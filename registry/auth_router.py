@@ -1,9 +1,9 @@
 from typing import Annotated
 
 from fastapi.exceptions import HTTPException
-from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi import APIRouter, Request, Form, Depends
+from fastapi.responses import RedirectResponse, Response
 
 from supabase import Client, create_client
 
@@ -39,7 +39,6 @@ def login(request: Request):
 
 @auth_router.post("/signup")
 def signup(
-    request: Request,
     name: Annotated[str, Form()],
     email: Annotated[str, Form()],
     ph_no: Annotated[str, Form()],
@@ -63,3 +62,32 @@ def signup(
 
     except Exception as error:
         raise HTTPException(status_code=500, detail=str(error))
+    
+@auth_router.post("/login")
+def login_user(
+    email: Annotated[str, Form()],
+    password: Annotated[str, Form()],
+    client: Client = Depends(get_supabase_client)
+):
+    try:
+        res = client.auth.sign_in_with_password({
+            "email": email,
+            "password": password
+        }).session
+        token = res.access_token
+        print(f"token: {token}")
+        response = RedirectResponse(
+            url='/dashboard', status_code=302
+        )
+        response.set_cookie("token", token)
+        return response
+
+    except Exception as error:
+        raise HTTPException(status_code=500, detail=str(error))
+
+@auth_router.get("/signout")
+def signout():
+    res = RedirectResponse(url='/auth/login')
+    res.delete_cookie("token")
+    return res
+
