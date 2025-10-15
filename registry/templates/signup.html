@@ -1,0 +1,12 @@
+{% extends 'index.html' %}
+{% block title %} Home {% endblock %}
+{% block body %}
+<h2>CREATE A TEST ACCOUNT</h2>
+<form method="post" action="/signup">
+    <input placeholder="Name" type="text" />
+    <input placeholder="Email" type="email" />
+    <input placeholder="password" type="password" />
+    <input placeholder="Phone Number" type="number" />
+    <button type="submit">Submit</button>
+</form>
+{% endblock %}
