@@ -1,12 +1,23 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Request, Form
+from fastapi.exceptions import HTTPException
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+from fastapi import APIRouter, Request, Form, Depends
 
-from supabase import Client
+from supabase import Client, create_client
+
+# supbase config
+url = "https://wtmxnlnqpcunnykgvmgt.supabase.co"
+key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0bXhubG5xcGN1bm55a2d2bWd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MDkyNDIsImV4cCI6MjA3NjA4NTI0Mn0.xjRy5qyYsrXjMa8y1B0jZHTLlKXSvi_o8qcLEeJuBdU"
+
+s_client: Client = create_client(url, key)
 
 auth_router = APIRouter(prefix="/auth")
 templates = Jinja2Templates(directory="templates")
+
+def get_supabase_client():
+    return s_client
 
 @auth_router.get("/")
 def home(request: Request):
@@ -20,24 +31,35 @@ def signup_page(request: Request):
         request, name='signup.html'
     )
 
+@auth_router.get("/login")
+def login(request: Request):
+    return templates.TemplateResponse(
+        request, name='login.html'
+    )
+
 @auth_router.post("/signup")
 def signup(
     request: Request,
-    client: Client,
     name: Annotated[str, Form()],
     email: Annotated[str, Form()],
     ph_no: Annotated[str, Form()],
-    password: Annotated[str, Form()]
+    password: Annotated[str, Form()],
+    client: Client = Depends(get_supabase_client)
 ):
     try:
-        client.auth.sign_up({
+        res = client.auth.sign_up({
             "email": email,
             "password": password,
-            "options": {"data": {
-                "name": name,
-                "ph_no": ph_no
-            }}
-        })
-        
+            "options": {
+                "data": {
+                    "name": name,
+                    "ph_no": ph_no
+                }
+            }
+        }
+        )
+        print(res)
+        return RedirectResponse(url='/auth/login', status_code=303)
+
     except Exception as error:
-        return error
+        raise HTTPException(status_code=500, detail=str(error))
