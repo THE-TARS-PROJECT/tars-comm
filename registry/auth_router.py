@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi.exceptions import HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi import APIRouter, Request, Form, Depends
-from fastapi.responses import RedirectResponse, Response
+from fastapi.responses import RedirectResponse, JSONResponse
 
 from supabase import Client, create_client
 
@@ -84,6 +84,24 @@ def login_user(
 
     except Exception as error:
         raise HTTPException(status_code=500, detail=str(error))
+    
+@auth_router.post("/login_client")
+def login_client(email: str, password: str, client: Client = Depends(get_supabase_client)):
+    try:
+        res = client.auth.sign_in_with_password({
+            "email": email,
+            "password": password
+        }).session
+        return JSONResponse(content={"msg": "success", "token": res.access_token})
+    
+    except Exception as error:
+        return JSONResponse(content={"msg": "failed to login", "error": str(error)})
+
+
+@auth_router.post("/verify_jwt")
+def verify_jwt(jwt: str, client: Client = Depends(get_supabase_client)):
+    res = client.auth.get_claims(jwt)
+    return JSONResponse(content={'msg': res['claims']['role']})
 
 @auth_router.get("/signout")
 def signout():
