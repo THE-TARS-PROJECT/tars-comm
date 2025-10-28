@@ -92,7 +92,11 @@ def login_client(email: str, password: str, client: Client = Depends(get_supabas
             "email": email,
             "password": password
         }).session
-        return JSONResponse(content={"msg": "success", "token": res.access_token})
+        return JSONResponse(content={
+            "msg": "success",
+            "name": res.user.user_metadata['name'],
+            "ph_no": res.user.user_metadata['ph_no']
+        })
     
     except Exception as error:
         return JSONResponse(content={"msg": "failed to login", "error": str(error)})
@@ -101,7 +105,10 @@ def login_client(email: str, password: str, client: Client = Depends(get_supabas
 @auth_router.post("/verify_jwt")
 def verify_jwt(jwt: str, client: Client = Depends(get_supabase_client)):
     res = client.auth.get_claims(jwt)
-    return JSONResponse(content={'msg': res['claims']['role']})
+    return JSONResponse(content={
+        'name': res['claims']['user_metadata']['name'],
+        'ph_no': res['claims']['user_metadata']['ph_no']
+        })
 
 @auth_router.get("/signout")
 def signout():

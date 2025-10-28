@@ -52,8 +52,8 @@ class LoginApp(QDialog):
             self.ui.passwordInput.text()
         )
         if res != "":
-            self.auth.edit_config("token", res)
-            print(res)
+            self.auth.edit_config("name", res[0])
+            self.auth.edit_config("ph_no", res[1])
         else:
             print("login failed")
 

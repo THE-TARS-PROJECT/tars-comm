@@ -5,9 +5,11 @@ from os import getenv, makedirs, path
 class Authenticator:
     def __init__(self):
         
-        self.endpoint = "http://localhost:8000/auth"
+        self.endpoint = "http://0.0.0.0:8080/auth"
         self.home = getenv("HOME")
         self.config = self.read_config()
+
+        print(self.config)
 
     """
     read_config
@@ -22,11 +24,12 @@ class Authenticator:
                 return data
 
         except FileNotFoundError:
+            print("cannot found file, making one")
             makedirs(path.dirname(f"{self.home}/tars/comm/config.json"))
             with open(f"{self.home}/tars/comm/config.json", "w") as config_file:
                 data = {
                     "ph_no": "",
-                    "token": "",
+                    "name": "",
                 }
                 dump(data, config_file)
                 config_file.close()
@@ -45,7 +48,8 @@ class Authenticator:
             "password": password
         })
         if req.status_code == 200:
-            return req.json()['token']
+            res = req.json()
+            return res["name"], res["ph_no"]
             
         else:
             return ""
@@ -65,9 +69,10 @@ class Authenticator:
     """
     def edit_config(self, key: str, value: str):
         try:
-            self.config[key] == value
+            self.config[key] = value
             with open(f"{self.home}/tars/comm/config.json", "w") as config_file:
                 dump(self.config, config_file)
+                config_file.close()
                 
         except KeyError:
             print(f"invalid param {key}")
