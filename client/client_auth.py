@@ -47,7 +47,7 @@ class Authenticator:
             "email": email,
             "password": password
         })
-        if req.status_code == 200:
+        if req.status_code == 200 and req.json()['msg'] == "success":
             res = req.json()
             return res["name"], res["ph_no"]
             

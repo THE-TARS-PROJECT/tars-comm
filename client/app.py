@@ -1,12 +1,30 @@
 from textual import on
 from textual.screen import Screen
-from textual.containers import VerticalGroup
 from textual.app import App, ComposeResult
-from textual.widgets import Static, Header, Footer, Input, Button
+from textual.containers import VerticalGroup, HorizontalGroup
+from textual.widgets import Static, Header, Footer, Input, Button, Label
 
 from client_auth import Authenticator
 
 auth = Authenticator()
+
+"""
+Custom Footer
+
+Will show application state and messages across the app, the built-in footer is kind of restricting
+"""
+class AppFooter(Static):
+
+    def compose(self) -> ComposeResult:
+        stat_label = Label("STATUS: ")
+        stat_val = Label("IDLE", id="sys-stat")
+
+        h_container = HorizontalGroup(stat_label, stat_val)
+        yield h_container
+
+    def update_status(self, status: str):
+        stat_val = self.get_widget_by_id("sys-stat")
+        stat_val.update(status)
 
 class LoginScreen(Screen):
     BINDINGS = [("escape", "app.pop_screen", "Pop screen")]
@@ -28,8 +46,7 @@ class LoginScreen(Screen):
             classes="centered-container"
         )
 
-        self.footer = Footer()
-        self.footer.border_title = ""
+        self.footer = AppFooter()
 
         yield header
         yield fields_container
@@ -44,10 +61,10 @@ class LoginScreen(Screen):
         if res != None:
             auth.edit_config("name", res[0])
             auth.edit_config("ph_no", res[1])
-            self.footer.border_title = "ACCESS GRANTED..."
+            self.footer.update_status("[green]ACCESS GRANTED....[/green]")
 
         else:
-            self.footer.border_title = "ACCESS DENIED"
+            self.footer.update_status("[red]ACCESS DENIED....[/red]")
 
 
 class App_(App):
