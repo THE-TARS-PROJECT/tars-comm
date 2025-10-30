@@ -42,7 +42,7 @@ class Authenticator:
     login user with email and password
     returns token
     """
-    def login_user(self, email: str, password: str) -> str:
+    def login_user(self, email: str, password: str):
         req = post(f"{self.endpoint}/login_client", params={
             "email": email,
             "password": password
@@ -52,7 +52,7 @@ class Authenticator:
             return res["name"], res["ph_no"]
             
         else:
-            return ""
+            return None
         
     """
     logout_user
