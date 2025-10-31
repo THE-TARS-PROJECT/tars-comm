@@ -5,6 +5,10 @@ from textual.css.query import NoMatches
 from textual.containers import VerticalGroup, HorizontalGroup
 from textual.widgets import Static, Label, ListView, ListItem, Input, Button
 
+from client_utils import ContactsManager
+
+contacts_manager = ContactsManager()
+
 
 class ContactItem(ListItem):
     def __init__(self, contact_name: str):
@@ -52,15 +56,24 @@ class AddContactDialog(ModalScreen):
 
         self.nameInput = Input(placeholder="Name", type="text", validate_on=['submitted'], classes='input-box')
         self.numberInput = Input(placeholder="Phone Number", type="integer", validate_on=['submitted'], classes='input-box', max_length=10)
-        add_btn  = Button("Add", flat=True, id="add-contact-btn")
-        discard_btn = Button("Discard", flat=True, id="discard-btn")
+        add_btn  = Button("Add", flat=True, id="add_contact_btn")
+        discard_btn = Button("Discard", flat=True, id="discard_btn")
 
         btn_layout = HorizontalGroup(add_btn, discard_btn)
         layout = VerticalGroup(self.nameInput, self.numberInput, btn_layout)
 
         yield layout
 
-    def action_discard(self):
+    @on(Button.Pressed, "#add_contact_btn")
+    def on_button_pressed(self, event):
+        name = self.nameInput.value
+        number = self.numberInput.value
+
+        if name != "" and number != "":
+            contacts_manager.add_contact(name, number)
+
+    @on(Button.Pressed, "#discard_btn")
+    def close_dialog(self, event):
         self.dismiss(True)
 
 """
@@ -69,20 +82,22 @@ ContactList
 simple contact list. that's it
 """
 class ContactList(Static):
+    BINDINGS = [
+        ('a', "add_contact", "Add New Contact")
+    ]
+    def __init__(self):
+        super(ContactList, self).__init__()
+
+        self.contacts_view = ListView(id="contacts-list")
     
     def compose(self) -> ComposeResult:
         t_header = SubpageHeader()
         t_header.set_title("CONTACT LISTS")
 
-        self.items = [
-            "Raghav",
-            "Tanmay",
-            "Aashish",
-            "Jitu Sir"
-        ]
+        contacts_manager.set_contacts_list_widget(self)
+        self.contacts = contacts_manager.get_contacts()
 
-        self.contacts_view = ListView(id="contacts-list")
-        for contact in self.items:
+        for contact in self.contacts:
             contact_item = ContactItem(contact)
             self.contacts_view._add_child(contact_item)
 
@@ -91,8 +106,14 @@ class ContactList(Static):
 
         yield w_layout
 
+    def get_contact_item(self, name: str):
+        return ContactItem(name)
+
+    def action_add_contact(self):
+        self.app.push_screen('add_contact')
+
     @on(ListView.Selected)
-    def on_item_selecte(self, event: ListView.Selected):
+    def on_item_selected(self, event: ListView.Selected):
         self.app.push_screen('add_contact')
 
 
