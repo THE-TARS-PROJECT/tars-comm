@@ -97,14 +97,17 @@ class ContactList(Static):
         contacts_manager.set_contacts_list_widget(self)
         self.contacts = contacts_manager.get_contacts()
 
-        for contact in self.contacts:
-            contact_item = ContactItem(contact)
-            self.contacts_view._add_child(contact_item)
-
-
         w_layout = VerticalGroup(t_header, self.contacts_view)
-
         yield w_layout
+
+    def on_mount(self, event):
+        for index, contact in enumerate(self.contacts):
+            contact_item = ContactItem(contact)
+            self.contacts_view.insert(index, [contact_item])
+
+    def gen_tree(self):
+        with open('./tree.txt', "w") as tree:
+            tree.write(str(self.app.css_tree))
 
     def get_contact_item(self, name: str):
         return ContactItem(name)

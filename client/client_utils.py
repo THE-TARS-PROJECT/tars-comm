@@ -3,6 +3,7 @@ from os.path import exists
 from json import dump, loads
 
 from textual._node_list import DuplicateIds
+from textual.widgets import ListView
 
 class ContactsManager:
     def __init__(self):
@@ -10,6 +11,7 @@ class ContactsManager:
 
         self.contacts_data = {}
         self._contacts_widget = None
+        self.contacts_list = None
 
         self.path = f"{getenv("HOME")}/tars/comm/contacts.json"
         if exists(self.path):
@@ -22,18 +24,17 @@ class ContactsManager:
     def set_contacts_list_widget(self, widget):
         self._contacts_widget = widget
 
-    def refresh_contacts_list(self):
-        contacts_list = self._contacts_widget.contacts_view
-        contacts_list.clear()
-        for contact in self.contacts_data.keys():
-            item = self._contacts_widget.get_contact_item(contact)
-            
-            try:
-                contacts_list._add_child(item)
-                contacts_list.refresh(layout=True)
+    def process_clear_list(self):
+        self.contacts_list: ListView = self._contacts_widget.contacts_view
+        for item in list(self.contacts_list.children):
+            item.remove()
 
-            except DuplicateIds:
-                pass
+        self.contacts_list.call_after_refresh(self.refresh_contacts_list)
+
+    def refresh_contacts_list(self):
+        contacts = [self._contacts_widget.get_contact_item(contact) for contact in self.contacts_data.keys()]
+        self.contacts_list.extend(contacts)
+
 
     def read_contacts(self):
         with open(self.path, "r") as contacts_file:
@@ -52,7 +53,7 @@ class ContactsManager:
             dump(self.contacts_data, contacts_file)
             contacts_file.close()
 
-        self.refresh_contacts_list()
+        self.process_clear_list()
 
     def delete_contact(self, name: str):
         self.contacts_data.pop(name)
