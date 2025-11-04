@@ -2,7 +2,6 @@ from os import getenv
 from os.path import exists
 from json import dump, loads
 
-from textual._node_list import DuplicateIds
 from textual.widgets import ListView
 
 class ContactsManager:
@@ -24,17 +23,6 @@ class ContactsManager:
     def set_contacts_list_widget(self, widget):
         self._contacts_widget = widget
 
-    def process_clear_list(self):
-        self.contacts_list: ListView = self._contacts_widget.contacts_view
-        for item in list(self.contacts_list.children):
-            item.remove()
-
-        self.contacts_list.call_after_refresh(self.refresh_contacts_list)
-
-    def refresh_contacts_list(self):
-        contacts = [self._contacts_widget.get_contact_item(contact) for contact in self.contacts_data.keys()]
-        self.contacts_list.extend(contacts)
-
 
     def read_contacts(self):
         with open(self.path, "r") as contacts_file:
@@ -53,7 +41,8 @@ class ContactsManager:
             dump(self.contacts_data, contacts_file)
             contacts_file.close()
 
-        self.process_clear_list()
+        contacts_list: ListView = self._contacts_widget.contacts_view
+        contacts_list.append(self._contacts_widget.get_contact_item(name))
 
     def delete_contact(self, name: str):
         self.contacts_data.pop(name)
