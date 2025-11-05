@@ -4,6 +4,9 @@ from json import dump, loads
 
 from textual.widgets import ListView
 
+import sounddevice as sd
+
+
 class ContactsManager:
     def __init__(self):
         super(ContactsManager, self).__init__()
@@ -51,3 +54,25 @@ class ContactsManager:
         self.delete_contact(name)
         self.add_contact(new_name, new_number)
 
+class AudioUtils:
+    def __init__(self):
+        super(AudioUtils, self).__init__()
+
+        self.input_device = None
+        self.output_device = None
+
+    """
+    get default audio input and output devices
+    args: none
+    output: tuple
+    """
+    def get_default_audio_io_devices(self):
+        di = sd.default.device[0]
+        di_info = sd.query_devices(di, "input")
+        do_info = sd.query_devices(di, "output")
+
+        self.input_device = di_info['name']
+        self.output_device = do_info['name']
+
+        return (self.input_device, self.output_device)
+    

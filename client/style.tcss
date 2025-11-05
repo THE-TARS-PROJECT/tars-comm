@@ -29,3 +29,12 @@ Button {
     align: center middle;
     border: solid red;
 }
+
+#main-content{
+    align: left top;
+    text-align: left;
+}
+#main-content_{
+    align: left top;
+    text-align: left;
+}

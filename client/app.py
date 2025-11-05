@@ -3,13 +3,16 @@ from textual.screen import Screen
 from textual.css.query import NoMatches
 from textual.app import App, ComposeResult
 from textual.widgets import Static, Header, Input, Button, Label
-from textual.containers import VerticalGroup, HorizontalGroup, Vertical
+from textual.containers import VerticalGroup, HorizontalGroup, Vertical, Horizontal
 
+from client_utils import AudioUtils
 from client_auth import Authenticator
+
 
 from subpages import ContactList, RecentCallPanel, AddContactDialog
 
 auth = Authenticator()
+audio_helper = AudioUtils()
 
 """
 Custom Footer
@@ -96,19 +99,30 @@ class HomeScreen(Screen):
         contacts_list_widget = ContactList()
         recent_calls_widget = RecentCallPanel()
 
+        active_microphone, active_od = audio_helper.get_default_audio_io_devices()
+        am_label = Label(f"Input Device: {active_microphone}")
+        od_label = Label(f"Output Device: {active_od}")
+
         contacts_list_widget.styles.height = "50%"
-        contacts_list_widget.styles.width = "30%"
+        contacts_list_widget.styles.min_width = "30%"
+        contacts_list_widget.styles.max_width = "50%"
 
         recent_calls_widget.styles.height = "50%"
-        recent_calls_widget.styles.width = "30%"
+        recent_calls_widget.styles.min_width = "30%"
+        recent_calls_widget.styles.max_width = "50%"
 
         home_layout = Vertical(contacts_list_widget, recent_calls_widget)
+        main_content = Horizontal(
+            Vertical(
+                am_label, od_label, id="main-content_", classes="main_content_"
+            )
+        )
 
         self.app_footer = AppFooter()
         self.app_footer.update_status("[green]CONNECTED[/green]")
 
         yield Header(show_clock=True)
-        yield home_layout
+        yield Horizontal(home_layout, main_content)
         yield self.app_footer
 
 """

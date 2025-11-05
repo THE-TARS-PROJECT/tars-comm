@@ -83,7 +83,8 @@ simple contact list. that's it
 """
 class ContactList(Static):
     BINDINGS = [
-        ('a', "add_contact", "Add New Contact")
+        ('a', "add_contact", "Add New Contact"),
+        ('d', "delete_contact", "Delete contact")
     ]
     def __init__(self):
         super(ContactList, self).__init__()
@@ -131,12 +132,7 @@ class RecentCallPanel(Static):
         t_header = SubpageHeader()
         t_header.set_title("RECENT CALLS")
 
-        self.items = [
-            "Raghav",
-            "Tanmay",
-            "Aashish",
-            "Jitu Sir"
-        ]
+        self.items = []
         contacts_view = ListView()
         for contact in self.items:
             contacts_view._add_child(ContactItem(contact))
