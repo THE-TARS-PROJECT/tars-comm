@@ -2,7 +2,7 @@ from time import sleep
 from os import getenv
 from os.path import exists
 from json import dump, loads
-from threading import Thread
+from threading import Lock
 
 from textual.app import App
 from textual.widgets import ListView, ProgressBar
@@ -62,8 +62,12 @@ class AudioUtils:
         self.input_device = None
         self.output_device = None
 
-        self.mic_vis = None            
-        self.app = None
+        self.volume = 0
+
+        self.stream = sd.InputStream(samplerate=44100, blocksize=1024, callback=self.input_audio_callback)
+    
+    def start_stream(self):
+        self.stream.start()
 
     """
     get default audio input and output devices
@@ -80,16 +84,6 @@ class AudioUtils:
         self.output_device = do_info['name']
 
         return (self.input_device, self.output_device)
-    
-    def set_mic_vis_widget(self, widget: ProgressBar):
-        self.mic_vis = widget
-
-    def set_app(self, app: App):
-        self.app = app
 
     def input_audio_callback(self, indata, frames, time, status):
-        print("CALLBACK FIRED")
-        volume = linalg.norm(indata)*10
-        self.app.log(str(f"volume data: {volume}"))
-        if self.mic_vis != None and self.app != None:
-            self.app.call_from_thread(self.mic_vis.update, int(min(volume, 100)))
+        self.volume = linalg.norm(indata)*10

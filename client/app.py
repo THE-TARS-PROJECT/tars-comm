@@ -94,14 +94,18 @@ HomeScreen
 shows contact list, recent calls, and ongoing call status
 """
 class HomeScreen(Screen):
-    
+    prog_bar = None
+
+    async def on_mount(self):
+        self.set_interval(0.05, self.update_prog)
+
     def compose(self):
         contacts_list_widget = ContactList()
         recent_calls_widget = RecentCallPanel()
 
-        mic_vis = ProgressBar(id="mic_vis", total=100)
-        audio_helper.set_mic_vis_widget(mic_vis)
-        audio_helper.set_app(self.app)
+        mic_vis = ProgressBar(id="mic_vis", total=100, show_eta=False, show_percentage=False)
+        self.prog_bar = mic_vis
+        audio_helper.start_stream()
 
         active_microphone, active_od = audio_helper.get_default_audio_io_devices()
         am_label = Label(f"Input Device: {active_microphone}")
@@ -128,6 +132,10 @@ class HomeScreen(Screen):
         yield Header(show_clock=True)
         yield Horizontal(home_layout, main_content)
         yield self.app_footer
+
+    async def update_prog(self):
+        if self.prog_bar != None:
+            self.prog_bar.update(progress=int(audio_helper.volume))
 
 """
 main app
