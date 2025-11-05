@@ -20,7 +20,7 @@ Button {
     height: auto;
     width: 100%;
     background: blue;
-    color: grey;
+    color: white;
 }
 
 .add-contact-dialog{

@@ -116,6 +116,12 @@ class ContactList(Static):
     def action_add_contact(self):
         self.app.push_screen('add_contact')
 
+    def action_delete_contact(self):
+        item = self.contacts_view.highlighted_child
+        label = item.query_one(Label)
+        contacts_manager.delete_contact(label.content)
+        self.contacts_view.remove_children([item])
+
     @on(ListView.Selected)
     def on_item_selected(self, event: ListView.Selected):
         self.app.push_screen('add_contact')

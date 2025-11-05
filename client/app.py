@@ -2,7 +2,7 @@ from textual import on
 from textual.screen import Screen
 from textual.css.query import NoMatches
 from textual.app import App, ComposeResult
-from textual.widgets import Static, Header, Input, Button, Label
+from textual.widgets import Static, Header, Input, Button, Label, ProgressBar
 from textual.containers import VerticalGroup, HorizontalGroup, Vertical, Horizontal
 
 from client_utils import AudioUtils
@@ -99,6 +99,10 @@ class HomeScreen(Screen):
         contacts_list_widget = ContactList()
         recent_calls_widget = RecentCallPanel()
 
+        mic_vis = ProgressBar(id="mic_vis", total=100)
+        audio_helper.set_mic_vis_widget(mic_vis)
+        audio_helper.set_app(self.app)
+
         active_microphone, active_od = audio_helper.get_default_audio_io_devices()
         am_label = Label(f"Input Device: {active_microphone}")
         od_label = Label(f"Output Device: {active_od}")
@@ -114,7 +118,7 @@ class HomeScreen(Screen):
         home_layout = Vertical(contacts_list_widget, recent_calls_widget)
         main_content = Horizontal(
             Vertical(
-                am_label, od_label, id="main-content_", classes="main_content_"
+                am_label, od_label, mic_vis, id="main-content_", classes="main_content_"
             )
         )
 

@@ -1,10 +1,14 @@
+from time import sleep
 from os import getenv
 from os.path import exists
 from json import dump, loads
+from threading import Thread
 
-from textual.widgets import ListView
+from textual.app import App
+from textual.widgets import ListView, ProgressBar
 
 import sounddevice as sd
+from numpy import linalg
 
 
 class ContactsManager:
@@ -14,23 +18,20 @@ class ContactsManager:
         self.contacts_data = {}
         self._contacts_widget = None
         self.contacts_list = None
+        self.file = None
 
         self.path = f"{getenv("HOME")}/tars/comm/contacts.json"
         if exists(self.path):
-            self.read_contacts()
+            self.file = open(self.path, "w")
         else:
             with open(self.path, "w") as contacts_file:
                 dump({}, contacts_file)
                 contacts_file.close()
 
+            self.file = open(self.path, "w")
+
     def set_contacts_list_widget(self, widget):
         self._contacts_widget = widget
-
-
-    def read_contacts(self):
-        with open(self.path, "r") as contacts_file:
-            self.contacts_data = loads(contacts_file.read())
-            contacts_file.close()
 
     def get_contacts(self):
         return self.contacts_data.keys()
@@ -40,15 +41,15 @@ class ContactsManager:
             "name": name,
             "number": number,
         }
-        with open(self.path, "w") as contacts_file:
-            dump(self.contacts_data, contacts_file)
-            contacts_file.close()
 
         contacts_list: ListView = self._contacts_widget.contacts_view
         contacts_list.append(self._contacts_widget.get_contact_item(name))
 
+        dump(self.contacts_data, self.file)
+
     def delete_contact(self, name: str):
         self.contacts_data.pop(name)
+        dump(self.contacts_data, self.file)
     
     def edit_contact(self, name: str, new_name: str, new_number: str):
         self.delete_contact(name)
@@ -61,6 +62,9 @@ class AudioUtils:
         self.input_device = None
         self.output_device = None
 
+        self.mic_vis = None            
+        self.app = None
+
     """
     get default audio input and output devices
     args: none
@@ -68,11 +72,24 @@ class AudioUtils:
     """
     def get_default_audio_io_devices(self):
         di = sd.default.device[0]
+        do = sd.default.device[1]
         di_info = sd.query_devices(di, "input")
-        do_info = sd.query_devices(di, "output")
+        do_info = sd.query_devices(do, "output")
 
         self.input_device = di_info['name']
         self.output_device = do_info['name']
 
         return (self.input_device, self.output_device)
     
+    def set_mic_vis_widget(self, widget: ProgressBar):
+        self.mic_vis = widget
+
+    def set_app(self, app: App):
+        self.app = app
+
+    def input_audio_callback(self, indata, frames, time, status):
+        print("CALLBACK FIRED")
+        volume = linalg.norm(indata)*10
+        self.app.log(str(f"volume data: {volume}"))
+        if self.mic_vis != None and self.app != None:
+            self.app.call_from_thread(self.mic_vis.update, int(min(volume, 100)))
