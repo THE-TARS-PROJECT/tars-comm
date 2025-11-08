@@ -1,8 +1,8 @@
 from textual import on
 from textual.app import ComposeResult
-from textual.screen import ModalScreen
+from textual.screen import Screen
 from textual.css.query import NoMatches
-from textual.containers import VerticalGroup, HorizontalGroup
+from textual.containers import VerticalGroup, Grid, Horizontal, Vertical
 from textual.widgets import Static, Label, ListView, ListItem, Input, Button
 
 from client_utils import ContactsManager
@@ -44,29 +44,49 @@ class SubpageHeader(Static):
         except NoMatches:
             self.pending_title = title
 
-class AddContactDialog(ModalScreen):
-    CSS_PATH = "./style.tcss"
-    classes="add-contact-dialog"
-    BINDINGS = [
-        ("c", "discard", "Discard Contact")
-    ]
+class AddContactDialog(Screen):
     
     def compose(self) -> ComposeResult:
-        self.styles.width = "60"
-        self.styles.height = "15"
         self.header = SubpageHeader()
-        self.header.set_title("Add Contact")
+        self.header.set_title("ADD CONTACT")
+        self.header.styles.margin = (0, 4, 0, 0)
 
-        self.nameInput = Input(placeholder="Name", type="text", validate_on=['submitted'], classes='input-box')
-        self.numberInput = Input(placeholder="Phone Number", type="integer", validate_on=['submitted'], classes='input-box', max_length=10)
-        add_btn  = Button("Add", flat=True, id="add_contact_btn")
-        discard_btn = Button("Discard", flat=True, id="discard_btn")
+        c_name_input = Input(placeholder="Contact Name", max_length=20)
+        c_num_input = Input(placeholder="Contact Number", max_length=10, type="number")
 
-        btn_layout = HorizontalGroup(add_btn, discard_btn)
-        layout = VerticalGroup(self.header, self.nameInput, self.numberInput, btn_layout)
+        add_btn = Button("Add", id="add-contact")
+        discard_btn = Button("Discard", id="discard-btn")
 
-        yield layout
+        add_btn.styles.width = "1fr"
+        discard_btn.styles.width = "1fr"
 
+        btn_box = Horizontal(
+            add_btn, discard_btn
+        )
+
+        main_content = Vertical(
+            Horizontal(
+                Label("Name: "), c_name_input
+            ),
+            Horizontal(
+                Label("Number: "), c_num_input
+            ),
+            btn_box
+        )
+
+        main_content.styles.border = ('heavy', 'yellow')
+        main_content.border_title = "Add Contact"
+
+        main_content.styles.width = "50%"
+        main_content.styles.height = "20"
+
+        parent = Vertical(main_content)
+        parent.styles.align_vertical = "middle"
+        parent.styles.align_horizontal = "center"
+
+        yield parent
+
+    
     @on(Button.Pressed, "#add_contact_btn")
     def on_button_pressed(self, event):
         name = self.nameInput.value
@@ -74,12 +94,6 @@ class AddContactDialog(ModalScreen):
 
         if name != "" and number != "":
             contacts_manager.add_contact(name, number)
-
-        self.dismiss(True)
-
-    @on(Button.Pressed, "#discard_btn")
-    def close_dialog(self, event):
-        self.dismiss(True)
 
 """
 ContactList
