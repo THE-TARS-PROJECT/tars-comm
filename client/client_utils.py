@@ -38,6 +38,8 @@ class ContactsManager:
         return self.contacts_data.keys()
 
     def add_contact(self, name: str, number: str):
+        if name in self.contacts_data.keys() or number in [num['number'] for num in self.contacts_data.values()]:
+            return "already exists"
         self.contacts_data[name] = {
             "name": name,
             "number": number,

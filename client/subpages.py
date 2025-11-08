@@ -45,11 +45,15 @@ class SubpageHeader(Static):
             self.pending_title = title
 
 class AddContactDialog(Screen):
+    
+    def on_mount(self):
+        self.set_interval(5.0, self.reset_title)
 
-    def set_app(self):
-        self.app: App = None
+    def reset_title(self):
+        self.border_title = "Add Contact"
     
     def compose(self) -> ComposeResult:
+
         self.c_name_input = Input(placeholder="Contact Name", max_length=20)
         self.c_num_input = Input(placeholder="Contact Number", max_length=10, type="number")
 
@@ -108,9 +112,13 @@ class AddContactDialog(Screen):
         number = self.c_num_input.value
 
         if name != "" and number != "":
-            contacts_manager.add_contact(name, number)
-            if self.app != None:
-                self.app.pop_screen()
+            x = contacts_manager.add_contact(name, number)
+            if x == "already exists":
+                self.border_title = "Already Exists"
+            
+            else:
+                self.dismiss(True)
+            
 
 """
 ContactList

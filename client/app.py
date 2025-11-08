@@ -148,7 +148,6 @@ class App_(App):
     }
     CSS_PATH = "style.tcss"
 
-
     def on_mount(self):
         self.screen.title = "TARS COMMUNICATION PROTOCOL"
 
