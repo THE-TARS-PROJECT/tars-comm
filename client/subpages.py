@@ -1,5 +1,5 @@
 from textual import on
-from textual.app import ComposeResult
+from textual.app import ComposeResult, App
 from textual.screen import Screen
 from textual.css.query import NoMatches
 from textual.containers import VerticalGroup, Grid, Horizontal, Vertical
@@ -45,14 +45,13 @@ class SubpageHeader(Static):
             self.pending_title = title
 
 class AddContactDialog(Screen):
+
+    def set_app(self):
+        self.app: App = None
     
     def compose(self) -> ComposeResult:
-        self.header = SubpageHeader()
-        self.header.set_title("ADD CONTACT")
-        self.header.styles.margin = (0, 4, 0, 0)
-
-        c_name_input = Input(placeholder="Contact Name", max_length=20)
-        c_num_input = Input(placeholder="Contact Number", max_length=10, type="number")
+        self.c_name_input = Input(placeholder="Contact Name", max_length=20)
+        self.c_num_input = Input(placeholder="Contact Number", max_length=10, type="number")
 
         add_btn = Button("Add", id="add-contact")
         discard_btn = Button("Discard", id="discard-btn")
@@ -63,37 +62,55 @@ class AddContactDialog(Screen):
         btn_box = Horizontal(
             add_btn, discard_btn
         )
+        btn_box.styles.column_gap = 2
+        
+        name_row = Horizontal(
+            Label("Name: "), self.c_name_input
+        )
+        
+        name_row.styles.column_gap = 2 
+        
+        name_row.styles.margin_bottom = 1 
+
+        number_row = Horizontal(
+            Label("Number: "), self.c_num_input
+        )
+        
+        number_row.styles.column_gap = 2 
+        
+        number_row.styles.margin_bottom = 2 
+        
+        self.c_name_input.styles.width = "100%"
+        self.c_num_input.styles.width = "100%"
 
         main_content = Vertical(
-            Horizontal(
-                Label("Name: "), c_name_input
-            ),
-            Horizontal(
-                Label("Number: "), c_num_input
-            ),
+            name_row,
+            number_row,
             btn_box
         )
 
-        main_content.styles.border = ('heavy', 'yellow')
+        main_content.styles.border = ('heavy', 'blue')
         main_content.border_title = "Add Contact"
-
+        
+        main_content.styles.padding = 1
         main_content.styles.width = "50%"
-        main_content.styles.height = "20"
+        main_content.styles.height = "50%" 
 
         parent = Vertical(main_content)
         parent.styles.align_vertical = "middle"
         parent.styles.align_horizontal = "center"
 
         yield parent
-
     
-    @on(Button.Pressed, "#add_contact_btn")
+    @on(Button.Pressed, "#add-contact")
     def on_button_pressed(self, event):
-        name = self.nameInput.value
-        number = self.numberInput.value
+        name = self.c_name_input.value
+        number = self.c_num_input.value
 
         if name != "" and number != "":
             contacts_manager.add_contact(name, number)
+            if self.app != None:
+                self.app.pop_screen()
 
 """
 ContactList
