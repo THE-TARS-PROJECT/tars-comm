@@ -30,11 +30,6 @@ Button {
     border: solid red;
 }
 
-#main-content{
-    align: left top;
-    text-align: left;
-}
-#main-content_{
-    align: left top;
-    text-align: left;
+.main-content_{
+    margin-left: 4;
 }

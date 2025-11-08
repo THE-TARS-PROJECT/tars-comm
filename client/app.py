@@ -94,6 +94,7 @@ HomeScreen
 shows contact list, recent calls, and ongoing call status
 """
 class HomeScreen(Screen):
+    CSS_PATH = "./style.tcss"
     prog_bar = None
 
     async def on_mount(self):
@@ -103,6 +104,9 @@ class HomeScreen(Screen):
         contacts_list_widget = ContactList()
         recent_calls_widget = RecentCallPanel()
 
+        contacts_list_widget.styles.height = "50%"
+        recent_calls_widget.styles.height = "50%"
+
         mic_vis = ProgressBar(id="mic_vis", total=100, show_eta=False, show_percentage=False)
         self.prog_bar = mic_vis
         audio_helper.start_stream()
@@ -111,26 +115,19 @@ class HomeScreen(Screen):
         am_label = Label(f"Input Device: {active_microphone}")
         od_label = Label(f"Output Device: {active_od}")
 
-        contacts_list_widget.styles.height = "50%"
-        contacts_list_widget.styles.min_width = "30%"
-        contacts_list_widget.styles.max_width = "50%"
+        left_bar = Vertical(contacts_list_widget, recent_calls_widget)
+        left_bar.styles.width = "25%"
 
-        recent_calls_widget.styles.height = "50%"
-        recent_calls_widget.styles.min_width = "30%"
-        recent_calls_widget.styles.max_width = "50%"
+        main_content = Vertical(am_label, od_label, self.prog_bar, classes="main-content")
+        main_content.styles.margin = (2,2,2,2)
 
-        home_layout = Vertical(contacts_list_widget, recent_calls_widget)
-        main_content = Horizontal(
-            Vertical(
-                am_label, od_label, mic_vis, id="main-content_", classes="main_content_"
-            )
-        )
+        main_layout = Horizontal(left_bar, main_content)
 
         self.app_footer = AppFooter()
-        self.app_footer.update_status("[green]CONNECTED[/green]")
+        self.app_footer.update_status("[green]CONNECTED....[/green]")
 
         yield Header(show_clock=True)
-        yield Horizontal(home_layout, main_content)
+        yield main_layout
         yield self.app_footer
 
     async def update_prog(self):

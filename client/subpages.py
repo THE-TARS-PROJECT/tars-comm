@@ -124,7 +124,7 @@ class ContactList(Static):
 
     @on(ListView.Selected)
     def on_item_selected(self, event: ListView.Selected):
-        self.app.push_screen('add_contact')
+        pass
 
 
 """
