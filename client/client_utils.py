@@ -1,11 +1,9 @@
-from time import sleep
 from os import getenv
-from os.path import exists
 from json import dump, loads
+from os.path import exists
 from threading import Lock
 
-from textual.app import App
-from textual.widgets import ListView, ProgressBar
+from textual.widgets import ListView
 
 import sounddevice as sd
 from numpy import linalg
@@ -21,14 +19,17 @@ class ContactsManager:
         self.file = None
 
         self.path = f"{getenv("HOME")}/tars/comm/contacts.json"
+        
         if exists(self.path):
-            self.file = open(self.path, "w")
-        else:
-            with open(self.path, "w") as contacts_file:
-                dump({}, contacts_file)
-                contacts_file.close()
+            with open(self.path, "r") as file:
+                self.contacts_data = loads(file.read())
+                file.close()
 
-            self.file = open(self.path, "w")
+        else:
+            with open(self.path, "w") as file:
+                self.contacts_data = {}
+                dump(self.contacts_data, file)
+                file.close()
 
     def set_contacts_list_widget(self, widget):
         self._contacts_widget = widget
@@ -45,15 +46,20 @@ class ContactsManager:
         contacts_list: ListView = self._contacts_widget.contacts_view
         contacts_list.append(self._contacts_widget.get_contact_item(name))
 
-        dump(self.contacts_data, self.file)
+        self.dump_data()
 
     def delete_contact(self, name: str):
         self.contacts_data.pop(name)
-        dump(self.contacts_data, self.file)
+        self.dump_data()
     
     def edit_contact(self, name: str, new_name: str, new_number: str):
         self.delete_contact(name)
         self.add_contact(new_name, new_number)
+
+    def dump_data(self):
+        with open(self.path, "w") as file:
+            dump(self.contacts_data, file)
+            file.close()
 
 class AudioUtils:
     def __init__(self):

@@ -45,12 +45,15 @@ class SubpageHeader(Static):
             self.pending_title = title
 
 class AddContactDialog(ModalScreen):
+    CSS_PATH = "./style.tcss"
     classes="add-contact-dialog"
     BINDINGS = [
         ("c", "discard", "Discard Contact")
     ]
     
     def compose(self) -> ComposeResult:
+        self.styles.width = "60"
+        self.styles.height = "15"
         self.header = SubpageHeader()
         self.header.set_title("Add Contact")
 
@@ -60,7 +63,7 @@ class AddContactDialog(ModalScreen):
         discard_btn = Button("Discard", flat=True, id="discard_btn")
 
         btn_layout = HorizontalGroup(add_btn, discard_btn)
-        layout = VerticalGroup(self.nameInput, self.numberInput, btn_layout)
+        layout = VerticalGroup(self.header, self.nameInput, self.numberInput, btn_layout)
 
         yield layout
 
@@ -71,6 +74,8 @@ class AddContactDialog(ModalScreen):
 
         if name != "" and number != "":
             contacts_manager.add_contact(name, number)
+
+        self.dismiss(True)
 
     @on(Button.Pressed, "#discard_btn")
     def close_dialog(self, event):

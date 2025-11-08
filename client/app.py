@@ -5,14 +5,16 @@ from textual.app import App, ComposeResult
 from textual.widgets import Static, Header, Input, Button, Label, ProgressBar
 from textual.containers import VerticalGroup, HorizontalGroup, Vertical, Horizontal
 
-from client_utils import AudioUtils
 from client_auth import Authenticator
+from client_utils import AudioUtils, ContactsManager
 
 
 from subpages import ContactList, RecentCallPanel, AddContactDialog
 
 auth = Authenticator()
 audio_helper = AudioUtils()
+
+contacts_manager = ContactsManager()
 
 """
 Custom Footer
@@ -145,6 +147,7 @@ class App_(App):
         "add_contact": AddContactDialog
     }
     CSS_PATH = "style.tcss"
+
 
     def on_mount(self):
         self.screen.title = "TARS COMMUNICATION PROTOCOL"
