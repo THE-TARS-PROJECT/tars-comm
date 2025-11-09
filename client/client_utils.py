@@ -1,7 +1,6 @@
 from os import getenv
 from json import dump, loads
 from os.path import exists
-from threading import Lock
 
 from textual.widgets import ListView
 

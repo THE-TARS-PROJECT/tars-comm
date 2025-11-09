@@ -90,17 +90,37 @@ class LoginScreen(Screen):
         else:
             self.footer.update_status("[red]ACCESS DENIED....[/red]")
 
+    CSS_PATH = "./style.tcss"
 """
 HomeScreen
 
 shows contact list, recent calls, and ongoing call status
 """
 class HomeScreen(Screen):
-    CSS_PATH = "./style.tcss"
+    def __init__(self, dial_data: dict):
+        super(HomeScreen, )
     prog_bar = None
+
+    BINDINGS = [
+        ('c', "show_dial_screen", "Dial Contact")
+    ]
 
     async def on_mount(self):
         self.set_interval(0.05, self.update_prog)
+
+    def action_show_dial_screen(self):
+        self.app.push_screen("dialer")
+
+    def handle_dialer_dismiss(self, data: dict):
+        if not data:
+            pass
+        else:
+            dialer_content = Vertical(
+                Label("----------------x----------------"),
+                Label(f"Name: {data['name']}"),
+                Label(f"Number: {data['number']}"),
+            )
+            self.main_content._add_child(dialer_content)
 
     def compose(self):
         contacts_list_widget = ContactList()
@@ -120,10 +140,10 @@ class HomeScreen(Screen):
         left_bar = Vertical(contacts_list_widget, recent_calls_widget)
         left_bar.styles.width = "25%"
 
-        main_content = Vertical(am_label, od_label, self.prog_bar, classes="main-content")
-        main_content.styles.margin = (2,2,2,2)
+        self.main_content = Vertical(am_label, od_label, self.prog_bar, classes="main-content")
+        self.main_content.styles.margin = (2,2,2,2)
 
-        main_layout = Horizontal(left_bar, main_content)
+        main_layout = Horizontal(left_bar, self.main_content)
 
         self.app_footer = AppFooter()
         self.app_footer.update_status("[green]CONNECTED....[/green]")
@@ -137,6 +157,37 @@ class HomeScreen(Screen):
             self.prog_bar.update(progress=int(audio_helper.volume))
 
 """
+DailerScreen
+Enter a number or select a contact to dial
+"""
+class DialerScreen(Screen):
+    def compose(self) -> ComposeResult:
+        self.header = Header()
+        self.screen.title = "DIALER"
+
+        dialer_input = Input(placeholder="Enter number / name of contact: ")
+        dialer_input.id = "dialer-input"
+        main_layout = Vertical(
+            dialer_input,
+        )
+
+        parent = Vertical(main_layout)
+
+        main_layout.styles.width = "50%"
+        main_layout.styles.height = "50%"
+
+        parent.styles.align_vertical = "middle"
+        parent.styles.align_horizontal = "center"
+
+        yield self.header
+        yield parent
+
+    @on(Input.Submitted, "#dialer-input")
+    def on_submitted(self):
+        self.dismiss(True)
+
+
+"""
 main app
 dont touch
 """
@@ -144,8 +195,10 @@ class App_(App):
     SCREENS = {
         "login": LoginScreen,
         "home": HomeScreen,
-        "add_contact": AddContactDialog
+        "add_contact": AddContactDialog,
+        'dialer': DialerScreen
     }
+
     CSS_PATH = "style.tcss"
 
     def on_mount(self):

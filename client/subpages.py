@@ -118,6 +118,11 @@ class AddContactDialog(Screen):
             
             else:
                 self.dismiss(True)
+
+
+    @on(Button.Pressed, "#discard-btn")
+    def on_button_pressed(self, event):
+        self.dismiss(True)
             
 
 """

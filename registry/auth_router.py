@@ -1,3 +1,5 @@
+from os import getenv
+from dotenv import load_dotenv
 from typing import Annotated
 
 from fastapi.exceptions import HTTPException
@@ -7,9 +9,11 @@ from fastapi.responses import RedirectResponse, JSONResponse
 
 from supabase import Client, create_client
 
+load_dotenv("./config.env")
+
 # supbase config
-url = "https://wtmxnlnqpcunnykgvmgt.supabase.co"
-key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0bXhubG5xcGN1bm55a2d2bWd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MDkyNDIsImV4cCI6MjA3NjA4NTI0Mn0.xjRy5qyYsrXjMa8y1B0jZHTLlKXSvi_o8qcLEeJuBdU"
+url = getenv("URL")
+key = getenv("KEY")
 
 s_client: Client = create_client(url, key)
 
