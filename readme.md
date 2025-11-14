@@ -37,12 +37,7 @@ I will post a setup.sh script soon. This script will install tars-comm as linux 
 ## HOW TO:
  - make an account ?
 
-    As of now, the project is more focused on core functionality, we provide default credentials to login.
-
-    ```
-    username: testuser123@gmail.com
-    password: HelloTars@2025
-    ```
+    Go to https://tars-comm.onrender.com/auth/signup , make an account, login to verify and you will redirected to a dashboard after that just put your email and password in the terminal app.
 
  - add contact ?
 

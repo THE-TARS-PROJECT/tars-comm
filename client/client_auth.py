@@ -5,7 +5,7 @@ from os import getenv, makedirs, path
 class Authenticator:
     def __init__(self):
         
-        self.endpoint = "http://0.0.0.0:8080/auth"
+        self.endpoint = "https://tars-comm.onrender.com/auth"
         self.home = getenv("HOME")
         self.config = self.read_config()
 
