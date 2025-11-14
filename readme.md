@@ -34,5 +34,27 @@ python3 app.py
 
 I will post a setup.sh script soon. This script will install tars-comm as linux service and it will simplify installation process.
 
+## HOW TO:
+ - make an account ?
+
+    As of now, the project is more focused on core functionality, we provide default credentials to login.
+
+    ```
+    username: testuser123@gmail.com
+    password: HelloTars@2025
+    ```
+
+ - add contact ?
+
+    Use tab to navigate between widget. Once, the Contact List widget is highlighted press **"a"** to add contact and put the details. This can be anything for now
+
+ - delete contact ?
+    
+    Simply press **"d"** on the highlight contact item.
+
+ - call my friend ?
+
+    haha!! wait for sometime, my nest request is not approved yet. But still press **"c"** and enter the number and press **enter**.
+
 ## Author
 Raghav Kumar (@Raghav67816)
