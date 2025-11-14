@@ -1,3 +1,4 @@
+import os
 from typing import Annotated
 from fastapi import FastAPI, Form
 from fastapi.requests import Request
@@ -8,9 +9,12 @@ from auth_router import s_client
 from auth_router import auth_router
 
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="static"), "static")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(BASE_DIR) 
 
-templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory=os.path.join(ROOT_DIR, "registry", "static")), "static")
+
+templates = Jinja2Templates(directory=os.path.join(ROOT_DIR, "registry", "templates"))
 
 app.include_router(auth_router)
 
