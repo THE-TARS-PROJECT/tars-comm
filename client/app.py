@@ -97,8 +97,8 @@ HomeScreen
 shows contact list, recent calls, and ongoing call status
 """
 class HomeScreen(Screen):
-    def __init__(self, dial_data: dict):
-        super(HomeScreen, )
+    def __init__(self):
+        super(HomeScreen, self).__init__()
     prog_bar = None
 
     BINDINGS = [
