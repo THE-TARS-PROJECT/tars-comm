@@ -4,6 +4,10 @@ Terminal is cool, like super cool. What if you make calls from your terminal giv
 
 TARS COMMUNICATION PROTOCAL is **terminal based VoIP app**. It works like just another VoIP client but in your terminal.
 
+![ss](https://raw.githubusercontent.com/THE-TARS-PROJECT/tars-comm/refs/heads/main/screenshots/Screenshot%20from%202025-11-14%2012-17-17.png)
+
+![ss](https://raw.githubusercontent.com/THE-TARS-PROJECT/tars-comm/refs/heads/main/screenshots/Screenshot%20from%202025-11-14%2012-17-22.png)
+
 ## Features
  - Terminal based sci-fi aesthetics
  - Save contacts
