@@ -8,9 +8,9 @@ from auth_router import s_client
 from auth_router import auth_router
 
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="static"), "static")
+app.mount("registry/static", StaticFiles(directory="static"), "static")
 
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="registry/templates")
 
 app.include_router(auth_router)
 
