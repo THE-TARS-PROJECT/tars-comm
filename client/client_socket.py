@@ -1,39 +1,28 @@
-from os import path, getenv
-from json import loads, dump
-from socketio.async_client import AsyncClient
+# implementation with dbus - systemd service
+from pydbus import SessionBus
+from gi.repository import GLib
+from socketio import AsyncClient
 
-from client_auth import Authenticator
-
-
-class ClientSocket(AsyncClient):
+class ClientService(AsyncClient):
     def __init__(self):
-        super(ClientSocket, self).__init__()
+        super(ClientService, self).__init__()
 
-        self.config_path = getenv("HOME")
-        self.auth = Authenticator()
+        self.dbus_session = SessionBus()
+        self.loop = GLib.Main_Loop()
+        self.config = {}
 
-        self.config = None
+        # connect to websocket
+        try:
+            self.connect(
+                "captainprice.hackclub.app", auth={
+                    "client_id": "",
+                    "token": "",
+                }
+            )
 
-        self.main()
-        
-    """
-    main 
+        except Exception as e:
+            pass
 
-    socketio loop, take user commands - temporary, until gui is developed
-    """
-    def main(self):
-        while True:
-            cmd = str(input("Enter command: "))
+    def read_config(self):
+        pass
 
-            # login
-            if cmd.lower() == "login":
-                email = str(input("Enter your email: "))
-                pass_ = str(input("Enter your password: "))
-                auth_res = self.auth.login_user(email, pass_)
-                if auth_res != "":
-                    self.edit_config('token', auth_res)
-                else:
-                    print('login failed')
-
-
-sock = ClientSocket()

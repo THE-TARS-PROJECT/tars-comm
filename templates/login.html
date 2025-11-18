@@ -1,0 +1,14 @@
+{% extends 'index.html' %}
+{% block title %} Home {% endblock %}
+{% block body %}
+<h2 class="mt-8 font-bold text-center">LOGIN TO TEST ACCOUNT</h2>
+<div class="flex w-full items-center justify-center align-center">
+    <form class="mt-8" method="post" action="/auth/login">
+        <div class="grid gap-4">
+            <input class="border p-2 rounded" placeholder="Email" name="email" type="email" />
+            <input class="border p-2 rounded" placeholder="password" name="password" type="password" />
+            <button class="bg-blue-600 hover:cursor-pointer p-2 rounded text-white" type="submit">Submit</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

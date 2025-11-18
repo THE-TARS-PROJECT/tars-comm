@@ -1,0 +1,14 @@
+{% extends 'index.html' %}
+{% block title %} Home {% endblock %}
+{% block body %}
+<h2 class="mt-8 text-center font-bold">CREATE A TEST ACCOUNT</h2>
+<div class="flex w-full items-center justify-center align-center">
+    <form class="grid gap-4 mt-8" method="post" action="/auth/signup">
+        <input class="border p-2 rounded" placeholder="Name" name="name" id="name" type="text" />
+        <input class="border p-2 rounded" placeholder="Email" type="email" name="email" id="email" />
+        <input class="border p-2 rounded" placeholder="password" name="password" id="password" type="password" />
+        <input class="border p-2 rounded" placeholder="Phone Number" name="ph_no" id="ph_no" type="number" />
+        <button class="bg-blue-600 hover:cursor-pointer p-2 rounded text-white" type="submit">Submit</button>
+    </form>
+</div>
+{% endblock %}
