@@ -1,0 +1,96 @@
+from os import getenv
+from json import dump, loads
+from os.path import exists
+
+from textual.widgets import ListView
+
+import sounddevice as sd
+from numpy import linalg
+
+
+class ContactsManager:
+    def __init__(self):
+        super(ContactsManager, self).__init__()
+
+        self.contacts_data = {}
+        self._contacts_widget = None
+        self.contacts_list = None
+        self.file = None
+
+        self.path = f"{getenv("HOME")}/tars/comm/contacts.json"
+        
+        if exists(self.path):
+            with open(self.path, "r") as file:
+                self.contacts_data = loads(file.read())
+                file.close()
+
+        else:
+            with open(self.path, "w") as file:
+                self.contacts_data = {}
+                dump(self.contacts_data, file)
+                file.close()
+
+    def set_contacts_list_widget(self, widget):
+        self._contacts_widget = widget
+
+    def get_contacts(self):
+        return self.contacts_data.keys()
+
+    def add_contact(self, name: str, number: str):
+        if name in self.contacts_data.keys() or number in [num['number'] for num in self.contacts_data.values()]:
+            return "already exists"
+        self.contacts_data[name] = {
+            "name": name,
+            "number": number,
+        }
+
+        contacts_list: ListView = self._contacts_widget.contacts_view
+        contacts_list.append(self._contacts_widget.get_contact_item(name))
+
+        self.dump_data()
+
+    def delete_contact(self, name: str):
+        self.contacts_data.pop(name)
+        self.dump_data()
+    
+    def edit_contact(self, name: str, new_name: str, new_number: str):
+        self.delete_contact(name)
+        self.add_contact(new_name, new_number)
+
+    def dump_data(self):
+        with open(self.path, "w") as file:
+            dump(self.contacts_data, file)
+            file.close()
+
+class AudioUtils:
+    def __init__(self):
+        super(AudioUtils, self).__init__()
+
+        self.input_device = None
+        self.output_device = None
+
+        self.volume = 0
+
+        self.stream = sd.InputStream(samplerate=44100, blocksize=1024, callback=self.input_audio_callback)
+    
+    def start_stream(self):
+        self.stream.start()
+
+    """
+    get default audio input and output devices
+    args: none
+    output: tuple
+    """
+    def get_default_audio_io_devices(self):
+        di = sd.default.device[0]
+        do = sd.default.device[1]
+        di_info = sd.query_devices(di, "input")
+        do_info = sd.query_devices(do, "output")
+
+        self.input_device = di_info['name']
+        self.output_device = do_info['name']
+
+        return (self.input_device, self.output_device)
+
+    def input_audio_callback(self, indata, frames, time, status):
+        self.volume = linalg.norm(indata)*10

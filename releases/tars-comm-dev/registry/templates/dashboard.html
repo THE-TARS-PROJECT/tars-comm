@@ -1,0 +1,11 @@
+{% extends 'index.html' %}
+{% block title %} Home {% endblock %}
+{% block body %}
+<h2>DASHBOARD</h2>
+<p>Name: {{ name }}</p>
+<p>Phone Number: {{ ph_no }}</p>
+
+<button>
+    <a href="/auth/signout">Sign Out</a>
+</button>
+{% endblock %}

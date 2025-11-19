@@ -20,19 +20,11 @@ TARS COMMUNICATION PROTOCAL is **terminal based VoIP app**. It works like just a
 ## Installation
 To install tars-comm project.
 
-- Download and unpack the latest release from Releases section.
+- Download the latest executable 'TARS_COM_PROTOCOL-Patched'
 
-- Install required packages
 ```bash
-pip3 install textual requests sounddevice numpy
-sudo apt install python3-pyaudio
-pip3 install PyAudio
-```
-
-- Run the app
-```
-cd client/
-python3 app.py
+chmod +x ./TARS_COM_PROTOCOL-Patched
+././TARS_COM_PROTOCOL-Patched
 ```
 
 I will post a setup.sh script soon. This script will install tars-comm as linux service and it will simplify installation process.
