@@ -6,6 +6,7 @@ from textual.widgets import Static, Header, Input, Button, Label, ProgressBar
 from textual.containers import VerticalGroup, HorizontalGroup, Vertical, Horizontal
 
 from client_auth import Authenticator
+from client_socket import ClientService
 from client_utils import AudioUtils, ContactsManager
 
 
@@ -15,6 +16,7 @@ auth = Authenticator()
 audio_helper = AudioUtils()
 
 contacts_manager = ContactsManager()
+dialer = ClientService()
 
 """
 Custom Footer
@@ -166,10 +168,10 @@ class DialerScreen(Screen):
     def compose(self) -> ComposeResult:
         self.header = Header()
 
-        dialer_input = Input(placeholder="Enter number / name of contact: ")
-        dialer_input.id = "dialer-input"
+        self.dialer_input = Input(placeholder="Enter number / name of contact: ")
+        self.dialer_input.id = "dialer-input"
         main_layout = Vertical(
-            dialer_input,
+            self.dialer_input,
         )
 
         parent = Vertical(main_layout)
@@ -186,7 +188,9 @@ class DialerScreen(Screen):
         yield parent
 
     @on(Input.Submitted, "#dialer-input")
-    def on_submitted(self):
+    async def on_submitted(self):
+        dialer.current_client_id = str(self.dialer_input.value)
+        await dialer.dial_number()
         self.dismiss(True)
 
 
@@ -204,8 +208,9 @@ class App_(App):
 
     CSS_PATH = "style.tcss"
 
-    def on_mount(self):
+    async def on_mount(self):
         self.screen.title = "TARS COMMUNICATION PROTOCOL"
+        dialer.connect_to_server()
 
         data = auth.config
         if data["ph_no"] == "":
