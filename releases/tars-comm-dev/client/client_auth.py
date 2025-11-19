@@ -25,7 +25,7 @@ class Authenticator:
 
         except FileNotFoundError:
             print("cannot found file, making one")
-            makedirs(path.dirname(f"{self.home}/tars/comm/config.json"))
+            makedirs(path.dirname(f"{self.home}/tars/comm/config.json"), exist_ok=True)
             with open(f"{self.home}/tars/comm/config.json", "w") as config_file:
                 data = {
                     "ph_no": "",
