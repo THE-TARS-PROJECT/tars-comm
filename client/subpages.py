@@ -57,7 +57,7 @@ class AddContactDialog(Screen):
         self.c_name_input = Input(placeholder="Contact Name", max_length=20)
         self.c_num_input = Input(placeholder="Contact Number", max_length=10, type="number")
 
-        add_btn = Button("Add", id="add-contact")
+        add_btn = Button("Add", classes="add-contact", id="add-contact")
         discard_btn = Button("Discard", id="discard-btn")
 
         add_btn.styles.width = "1fr"
@@ -107,7 +107,8 @@ class AddContactDialog(Screen):
         yield parent
     
     @on(Button.Pressed, "#add-contact")
-    def on_button_pressed(self, event):
+    def handle_add_contact(self, event):
+        self.app.log("clicked add contact button")
         name = self.c_name_input.value
         number = self.c_num_input.value
 
@@ -119,9 +120,11 @@ class AddContactDialog(Screen):
             else:
                 self.dismiss(True)
 
+        self.dismiss(True)
+
 
     @on(Button.Pressed, "#discard-btn")
-    def on_button_pressed(self, event):
+    def handle_discard(self, event):
         self.dismiss(True)
             
 

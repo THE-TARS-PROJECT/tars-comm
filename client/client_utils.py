@@ -27,7 +27,7 @@ class ContactsManager:
         else:
             makedirs(path.dirname(self.path), exist_ok=True)
             with open(self.path, "w") as file:
-                self.contacts_data = {}
+                self.contacts_data = {"file": "was not found originally"}
                 dump(self.contacts_data, file)
                 file.close()
 
@@ -61,7 +61,6 @@ class ContactsManager:
     def dump_data(self):
         with open(self.path, "w") as file:
             dump(self.contacts_data, file)
-            file.close()
 
 class AudioUtils:
     def __init__(self):
