@@ -99,7 +99,8 @@ def login_client(email: str, password: str, client: Client = Depends(get_supabas
         return JSONResponse(content={
             "msg": "success",
             "name": res.user.user_metadata['name'],
-            "ph_no": res.user.user_metadata['ph_no']
+            "ph_no": res.user.user_metadata['ph_no'],
+            "access_token": res.access_token
         })
     
     except Exception as error:

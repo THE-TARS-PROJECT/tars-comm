@@ -3,26 +3,33 @@ from pydbus import SessionBus
 from gi.repository import GLib
 from socketio import AsyncClient
 
+from client_auth import Authenticator
+
 class ClientService(AsyncClient):
     def __init__(self):
         super(ClientService, self).__init__()
 
         self.dbus_session = SessionBus()
         self.loop = GLib.Main_Loop()
-        self.config = {}
+
+        self.auth = Authenticator()
+        self.config = self.auth.read_config()
+
 
         # connect to websocket
         try:
-            self.connect(
-                "captainprice.hackclub.app", auth={
-                    "client_id": "",
-                    "token": "",
-                }
-            )
+            if self.config['name']:
+                self.connect(
+                    "captainprice.hackclub.com", auth={
+                        "client_id": self.config['name'],
+                        "token": self.config['access_token']
+                    }
+                )
 
         except Exception as e:
-            pass
+            print("failed to connect to server.", str(e))
 
-    def read_config(self):
-        pass
+
+# test
+service = ClientService()
 

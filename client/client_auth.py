@@ -49,7 +49,7 @@ class Authenticator:
         })
         if req.status_code == 200 and req.json()['msg'] == "success":
             res = req.json()
-            return res["name"], res["ph_no"]
+            return res["name"], res["ph_no"], res['access_token']
             
         else:
             return None
