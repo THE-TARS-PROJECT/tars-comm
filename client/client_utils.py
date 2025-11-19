@@ -1,6 +1,6 @@
-from os import getenv
 from json import dump, loads
 from os.path import exists
+from os import getenv, path, makedirs
 
 from textual.widgets import ListView
 
@@ -25,6 +25,7 @@ class ContactsManager:
                 file.close()
 
         else:
+            makedirs(path.dirname(self.path), exist_ok=True)
             with open(self.path, "w") as file:
                 self.contacts_data = {}
                 dump(self.contacts_data, file)

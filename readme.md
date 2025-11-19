@@ -20,14 +20,13 @@ TARS COMMUNICATION PROTOCAL is **terminal based VoIP app**. It works like just a
 ## Installation
 To install tars-comm project.
 
-- Clone this repo
-```bash
-git clone https://github.com/THE-TARS-PROJECT/tars-comm.git
-```
+- Download and unpack the latest release from Releases section.
 
 - Install required packages
 ```bash
 pip3 install textual requests sounddevice numpy
+sudo apt install python3-pyaudio
+pip3 install PyAudio
 ```
 
 - Run the app
@@ -42,6 +41,8 @@ I will post a setup.sh script soon. This script will install tars-comm as linux 
  - make an account ?
 
     Go to https://tars-comm.onrender.com/auth/signup , make an account, login to verify and you will redirected to a dashboard after that just put your email and password in the terminal app.
+
+    **NOTE: APIs hosted on Render go inactive after inactivity**
 
  - add contact ?
 

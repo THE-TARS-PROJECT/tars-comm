@@ -5,7 +5,7 @@ from os import getenv, makedirs, path
 class Authenticator:
     def __init__(self):
         
-        self.endpoint = "https://tars-comm.onrender.com/auth"
+        self.endpoint = "https://captainprice.hackclub.app"
         self.home = getenv("HOME")
         self.config = self.read_config()
 
@@ -20,12 +20,11 @@ class Authenticator:
         try:
             with open(f"{self.home}/tars/comm/config.json", "r") as config_file:
                 data = loads(config_file.read())
-                config_file.close()
                 return data
 
         except FileNotFoundError:
             print("cannot found file, making one")
-            makedirs(path.dirname(f"{self.home}/tars/comm/config.json"))
+            makedirs(path.dirname(f"{self.home}/tars/comm/config.json"), exist_ok=True)
             with open(f"{self.home}/tars/comm/config.json", "w") as config_file:
                 data = {
                     "ph_no": "",
@@ -49,7 +48,7 @@ class Authenticator:
         })
         if req.status_code == 200 and req.json()['msg'] == "success":
             res = req.json()
-            return res["name"], res["ph_no"], res['access_token']
+            return res["name"], res["ph_no"]
             
         else:
             return None
