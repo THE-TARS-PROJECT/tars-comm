@@ -165,7 +165,6 @@ Enter a number or select a contact to dial
 class DialerScreen(Screen):
     def compose(self) -> ComposeResult:
         self.header = Header()
-        self.screen.title = "DIALER"
 
         dialer_input = Input(placeholder="Enter number / name of contact: ")
         dialer_input.id = "dialer-input"
@@ -180,6 +179,8 @@ class DialerScreen(Screen):
 
         parent.styles.align_vertical = "middle"
         parent.styles.align_horizontal = "center"
+        parent.styles.border = ('heavy', 'blue')
+        parent.border_title = "Dialer"
 
         yield self.header
         yield parent
