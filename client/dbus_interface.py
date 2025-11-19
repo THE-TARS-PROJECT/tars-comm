@@ -1,21 +1,22 @@
 from asyncio import Event, run
 from dbus_fast.service import (
-    ServiceInterface, dbus_signal
+    ServiceInterface, dbus_method
 )
 from dbus_fast.aio import MessageBus
 from client_socket import ClientService
 
-
 class TarsComInterface(ServiceInterface):
+
     def __init__(self):
+        super(TarsComInterface, self).__init__("com.cooper.tars")
         
-        self.sock = ClientService()
-        self.sock.connect_to_server()
+        # self.sock = ClientService()
+        # self.sock.connect_to_server()
 
 
-    @dbus_signal("call_requested")
-    async def on_call_requested(self, data):
-        self.sock.dial_number(data)
+    @dbus_method()
+    async def on_call_requested(self, data: 's') -> 's':
+        return f"hello, {data}"
 
 
 async def main():
