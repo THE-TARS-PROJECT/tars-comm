@@ -21,10 +21,10 @@ class ClientManager:
     auth_client
     authenticate client, return true if registered else return false
     """
-    def auth_client(self, client_id: str, token: str):
+    def auth_client(self, phone_no: str, token: str):
         res = self.client.auth.get_user(token)
         if res.user.aud == "authenticated":
-            self.clients[client_id] = {'room': ''}
+            self.clients[phone_no] = {'room': ''}
             return True
         else:
             return False
@@ -34,10 +34,10 @@ class ClientManager:
 
     check if client is connected to the master socket
     """
-    def client_lookup(self, client_id: str):
+    def client_lookup(self, phone_no: str):
         try:
-            if self.clients[client_id]:
-                if self.clients[client_id]['room']:
+            if self.clients[phone_no]:
+                if self.clients[phone_no]['room']:
                     return CLIENT_STATUS.BUSY
                 else:
                     return CLIENT_STATUS.ONLINE

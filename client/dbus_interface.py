@@ -3,7 +3,6 @@ from dbus_fast.service import (
     ServiceInterface, dbus_method
 )
 from dbus_fast.aio import MessageBus
-from client_socket import ClientService
 
 class TarsComInterface(ServiceInterface):
 

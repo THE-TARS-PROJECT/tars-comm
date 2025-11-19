@@ -37,8 +37,8 @@ class ClientService(AsyncClient):
             if self.connected:
                 self.disconnect()
 
-    async def dial_number(self):
-        if not self.is_dialer_busy and self.current_client_id != None:
+    async def dial_number(self, target_ph_no: str):
+        if not self.is_dialer_busy and target_ph_no != "":
             self.emit("handle_dial", data={
                 "target_client_id": self.current_client_id
             })

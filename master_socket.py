@@ -4,6 +4,8 @@ from fastapi.templating import Jinja2Templates
 from socketio import AsyncServer, ASGIApp
 from utils import ClientManager, CLIENT_STATUS
 
+from enum import Enum
+
 from auth_router import auth_router, s_client
 
 
@@ -32,6 +34,12 @@ def dashboard(request: Request):
         }
     )
 
+class Events(Enum):
+    SERVER_MESSAGE = "SERVER_MESSAGE" # Simple server message
+    CALL_REQUEST_STATUS = "CALL_REQUEST_STATUS" # Tells the client about the status of call request
+    REQUEST_CALL = "REQUEST_CALL" # A is client is requesting the server to call another client
+    CALL_ACCEPTED = "CALL_ACCEPTED" # The client has accepted the call, server will put both in a room
+    CALL_REJECTED = "CALL_REJECTED" # The client rejected the call
 
 """
 connect
@@ -57,8 +65,8 @@ client must emit dial with target_client_id to connect to another socket.
 async def handle_dial(sid, data):
     print(f"received dial request from: {sid}")
     if client_manager.client_lookup(data['target_client_id']) == CLIENT_STATUS.ONLINE:
-        await sock.emit("call_req", data={
-            "req_client_id": sid
+        await sock.emit(Events.CALL_REQUEST_STATUS, data={
+            "msg": "calling"
         }, to=sid)
 
     else:

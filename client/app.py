@@ -95,6 +95,8 @@ class LoginScreen(Screen):
             self.footer.update_status("[red]ACCESS DENIED....[/red]")
 
     CSS_PATH = "./style.tcss"
+
+
 """
 HomeScreen
 
@@ -188,9 +190,8 @@ class DialerScreen(Screen):
         yield parent
 
     @on(Input.Submitted, "#dialer-input")
-    async def on_submitted(self):
-        dialer.current_client_id = str(self.dialer_input.value)
-        await dialer.dial_number()
+    async def on_submitted(self, event: Input.Submitted):
+        await dialer.dial_number(self.dialer_input.value)
         self.dismiss(True)
 
 
@@ -210,7 +211,7 @@ class App_(App):
 
     async def on_mount(self):
         self.screen.title = "TARS COMMUNICATION PROTOCOL"
-        dialer.connect_to_server()
+        self.run_worker(dialer.connect_to_server(), exclusive=True)
 
         data = auth.config
         if data["ph_no"] == "":
