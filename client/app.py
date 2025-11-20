@@ -190,8 +190,7 @@ class DialerScreen(Screen):
         yield parent
 
     @on(Input.Submitted, "#dialer-input")
-    async def on_submitted(self, event: Input.Submitted):
-        await dialer.dial_number(self.dialer_input.value)
+    def on_submitted(self, event: Input.Submitted):
         self.dismiss(True)
 
 
@@ -211,7 +210,6 @@ class App_(App):
 
     async def on_mount(self):
         self.screen.title = "TARS COMMUNICATION PROTOCOL"
-        self.run_worker(dialer.connect_to_server(), exclusive=True)
 
         data = auth.config
         if data["ph_no"] == "":
