@@ -30,18 +30,19 @@ class ClientService(AsyncClient):
             self.wait()            
 
         except Exception as error:
-            print("failed to connect to the server", str(error))
+            print(f"failed to connect to the server, {str(error)}")
 
         finally:
             if self.connected:
                 await self.disconnect()
 
     async def dial_number(self, target_ph_no: str):
-        if not self.is_dialer_busy and target_ph_no != "":
-            await self.emit("handle_dial", data={
-                "target_client_id": self.current_client_id
-            })
-            self.is_dialer_busy = True
+        if self.connected:
+            if not self.is_dialer_busy and target_ph_no != "":
+                await self.emit("handle_dial", data={
+                    "target_client_id": self.current_client_id
+                })
+                self.is_dialer_busy = True
 
 async def main():
     app = ClientService()

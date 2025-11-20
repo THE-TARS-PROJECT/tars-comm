@@ -29,6 +29,23 @@ chmod +x ./TARS_COM_PROTOCOL-Patched
 
 I will post a setup.sh script soon. This script will install tars-comm as linux service and it will simplify installation process.
 
+## Build From Source
+If you are using MacOS follow the steps below:
+ - Make sure you have Python3 installed on your computer.
+ - Install the SOURCE CODE from here https://github.com/THE-TARS-PROJECT/tars-comm/archive/refs/tags/dev.zip
+ - Open terminal in the project root
+ - Install requirements
+
+   ```bash
+   pip3 install -r requirements.txt   
+   cd client/
+      
+   ```
+ - Run the app
+ ```bash
+   python3 app.py
+ ```
+
 ## HOW TO:
  - make an account ?
 

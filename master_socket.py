@@ -50,26 +50,18 @@ only registered clients allowed
 @sock.event
 async def connect(sid, environ, auth):
     if client_manager.auth_client(auth['client_id'], auth['token']):
-        await sock.emit("server_msg", data={'msg': 'connected'}, to=sid)
+        await sock.emit(Events.SERVER_MESSAGE, data={'msg': 'connected'}, to=sid)
     else:
-        await sock.emit("server_msg", data={'msg': 'failed'}, to=sid)
+        await sock.emit(Events.SERVER_MESSAGE, data={"msg": "failed to connect"}, to=sid)
 
 
 """
 handle_dial
 
-connection does not automatically call the the target.
-client must emit dial with target_client_id to connect to another socket.
+client socket emits "request_dial"
 """
-@sock.event
-async def handle_dial(sid, data):
-    print(f"received dial request from: {sid}")
-    if client_manager.client_lookup(data['target_client_id']) == CLIENT_STATUS.ONLINE:
-        await sock.emit(Events.CALL_REQUEST_STATUS, data={
-            "msg": "calling"
-        }, to=sid)
-
-    else:
-        await sock.emit("call_resp", data={
-            "msg": "target client not available"
-        }, to=sid)
+@sock.on("request_dial")
+def on_dial_requested(sid, data):
+    if client_manager.client_lookup(data['phone_no']) == CLIENT_STATUS.OFFLINE:
+        sock.emit(Events.CALL_REQUEST_STATUS, data={"msg": "request client not available"}, to=sid)
+        

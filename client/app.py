@@ -16,7 +16,6 @@ auth = Authenticator()
 audio_helper = AudioUtils()
 
 contacts_manager = ContactsManager()
-dialer = ClientService()
 
 """
 Custom Footer
