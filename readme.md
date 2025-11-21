@@ -64,5 +64,14 @@ If you are using MacOS follow the steps below:
 
     haha!! wait for sometime, my nest request is not approved yet. But still press **"c"** and enter the number and press **enter**.
 
+## Troubleshooting
+If you are facing any issues please refer to this section:
+
+- Failed to connect to server
+  head over to https://captainprice.hackclub.app/login and log in to your account. You will be redirected to dashboard, right click on the page and go to Inspect -> Application -> Cookies
+  Copy the token value and paste it in **test-token.txt**
+
+  This will be fixed ;)
+
 ## Author
 Raghav Kumar (@Raghav67816)
