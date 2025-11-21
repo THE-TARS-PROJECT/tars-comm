@@ -1,3 +1,4 @@
+from asyncio import run
 from json import dump, loads
 from os.path import exists
 from os import getenv, path, makedirs
@@ -6,6 +7,8 @@ from textual.widgets import ListView
 
 import sounddevice as sd
 from numpy import linalg
+
+from dbus_fast.aio import MessageBus
 
 
 class ContactsManager:
@@ -94,3 +97,35 @@ class AudioUtils:
 
     def input_audio_callback(self, indata, frames, time, status):
         self.volume = linalg.norm(indata)*10
+
+
+class ClientDBUS:
+    def __init__(self):
+        super(ClientDBUS, self).__init__()
+
+        self.bus, self.obj, self.interface = None, None, None
+
+    async def setup(self):
+        self.bus = await MessageBus().connect()
+        intros = await self.bus.introspect(
+            "com.cooper.tars",
+            "/cooper/tars/comm"
+        )
+        self.obj = self.bus.get_proxy_object(
+            "com.cooper.tars",
+            "/cooper/tars/comm",
+            intros
+        )
+        self.interface = self.obj.get_interface("com.cooper.tars.interface")
+
+    def get_interface(self):
+        return self.interface
+    
+
+async def dbus_test():
+    dbus = ClientDBUS()
+    await dbus.setup()
+    iface = dbus.get_interface()
+    print(await iface.call_dial_number("Hello, World"))
+
+run(dbus_test())
