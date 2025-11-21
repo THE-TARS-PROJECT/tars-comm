@@ -24,7 +24,7 @@ To install tars-comm project.
 
 ```bash
 chmod +x ./TARS_COM_PROTOCOL-Patched
-././TARS_COM_PROTOCOL-Patched
+./TARS_COM_PROTOCOL-Patched
 ```
 
 I will post a setup.sh script soon. This script will install tars-comm as linux service and it will simplify installation process.
@@ -37,9 +37,8 @@ If you are using MacOS follow the steps below:
  - Install requirements
 
    ```bash
-   pip3 install -r requirements.txt   
+   pip3 install numpy textual python-socketio sounddevice supabase fastapi python-dotenv
    cd client/
-      
    ```
  - Run the app
  ```bash
