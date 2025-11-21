@@ -56,6 +56,7 @@ class LoginScreen(Screen):
         if res != None:
             self.auth.edit_config("name", res[0])
             self.auth.edit_config("ph_no", res[1])
+            self.auth.edit_config("access_token", res[2])
             self.footer.update_status("[green]ACCESS GRANTED....[/green]")
             self.app.push_screen("home")
             self.app.title = "TARS COMMUNICATION PROTOCOL"

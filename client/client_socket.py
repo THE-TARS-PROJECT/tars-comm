@@ -33,11 +33,12 @@ class ClientSock:
 
     async def connect(self, client_id: str):
         try:
+            access_token = self.auth.read_config()['access_token']
             await self.sock.connect(
                 "https://captainprice.hackclub.app",
                 auth={
                     "client_id": client_id,
-                    "token": load_test_token()
+                    "token": access_token
                 }
             )
             self.sock.logger.info("Connected to server")
