@@ -1,7 +1,7 @@
 # implementation with dbus - systemd service
 from asyncio import run
 from socketio.async_client import AsyncClient
-from client_auth import Authenticator
+from client.restruct.client_auth import Authenticator
 
 def load_test_token() -> str:
     with open("./test-token.txt", "r") as token:
