@@ -6,7 +6,7 @@ class Authenticator:
     def __init__(self):
         
         self.endpoint = "https://captainprice.hackclub.app"
-        self.home = getenv("HOME")
+        self.home = getenv('HOME')
         self.config = self.read_config()
 
         print(self.config)

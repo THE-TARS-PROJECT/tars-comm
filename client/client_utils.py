@@ -122,10 +122,3 @@ class ClientDBUS:
         return self.interface
     
 
-async def dbus_test():
-    dbus = ClientDBUS()
-    await dbus.setup()
-    iface = dbus.get_interface()
-    print(await iface.call_dial_number("Hello, World"))
-
-run(dbus_test())
