@@ -1,52 +1,70 @@
 # implementation with dbus - systemd service
-from asyncio import run
+from enum import Enum
+from asyncio import run, CancelledError
 from socketio.async_client import AsyncClient
-from client.restruct.client_auth import Authenticator
+from socketio.exceptions import ConnectionError, ConnectionRefusedError
 
-def load_test_token() -> str:
+from client_auth import Authenticator
+
+class Events(Enum):
+    SERVER_MESSAGE = "SERVER_MESSAGE" # Simple server message
+    DIAL_REQ_RESP = "DIAL_REQ_RESP"
+
+
+def load_test_token():
     with open("./test-token.txt", "r") as token:
         token_ = token.read()
         return token_
 
-class ClientService(AsyncClient):
+class ClientSock:
     def __init__(self):
-        super(ClientService, self).__init__()
-
+        super(ClientSock, self).__init__()
+        
+        self.sock = AsyncClient(reconnection=True, logger=True)
         self.auth = Authenticator()
-        self.config = self.auth.read_config()
 
-        self.is_dialer_busy = False
-        self.current_client_id = None
+        # self.sock.on(Events.SERVER_MESSAGE, self.on_server_message)
+        self.sock.on("server_msg", self.on_server_message)
+        self.sock.on("call_resp", self.on_dial_req_response)
 
-    async def connect_to_server(self):
+    async def connect(self, client_id: str):
         try:
-            await self.connect(
+            await self.sock.connect(
                 "https://captainprice.hackclub.app",
                 auth={
-                    "client_id": self.config['ph_no'],
+                    "client_id": client_id,
                     "token": load_test_token()
                 }
             )
-            self.wait()            
+            self.sock.logger.info("Connected to server")
+            print("Connected to server")
+            
+            await self.sock.wait()
 
-        except Exception as error:
-            print(f"failed to connect to the server, {str(error)}")
+        except ConnectionError as con_error:
+            self.sock.logger.error(f"An unexpected error occurred while connecting to the server: {str(con_error)}")
+            print(f"An unexpected error occurred while connecting to the server: {str(con_error)}")
 
-        finally:
-            if self.connected:
-                await self.disconnect()
+        except ConnectionRefusedError as con_refused:
+            self.sock.logger.error(f"Server refused the connection: {str(con_refused)}")
+            print(f"Server refused the connection: {str(con_refused)}")
 
-    async def dial_number(self, target_ph_no: str):
-        if self.connected:
-            if not self.is_dialer_busy and target_ph_no != "":
-                await self.emit("handle_dial", data={
-                    "target_client_id": self.current_client_id
-                })
-                self.is_dialer_busy = True
+    def on_server_message(self, data):
+        print(data['msg'])
 
+    def on_dial_req_response(self, data):
+        print(data['msg'])
+
+"""
+test
+"""
 async def main():
-    app = ClientService()
-    await app.connect_to_server()
-    await app.dial_number("8285889071")
+    cs = ClientSock()
+    await cs.connect("9582576830")
 
-run(main())
+
+try:
+    run(main())
+
+except CancelledError:
+    print("Closing the socket")

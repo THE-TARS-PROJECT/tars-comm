@@ -34,7 +34,7 @@ def dashboard(request: Request):
         }
     )
 
-class Events(Enum):
+class ServerEvents(Enum):
     SERVER_MESSAGE = "SERVER_MESSAGE" # Simple server message
     CALL_REQUEST_STATUS = "CALL_REQUEST_STATUS" # Tells the client about the status of call request
     REQUEST_CALL = "REQUEST_CALL" # A is client is requesting the server to call another client
@@ -50,9 +50,9 @@ only registered clients allowed
 @sock.event
 async def connect(sid, environ, auth):
     if client_manager.auth_client(auth['client_id'], auth['token']):
-        await sock.emit(Events.SERVER_MESSAGE, data={'msg': 'connected'}, to=sid)
+        await sock.emit(ServerEvents.SERVER_MESSAGE, data={'msg': 'connected'}, to=sid)
     else:
-        await sock.emit(Events.SERVER_MESSAGE, data={"msg": "failed to connect"}, to=sid)
+        await sock.emit(ServerEvents.SERVER_MESSAGE, data={"msg": "failed to connect"}, to=sid)
 
 
 """
@@ -63,5 +63,5 @@ client socket emits "request_dial"
 @sock.on("request_dial")
 def on_dial_requested(sid, data):
     if client_manager.client_lookup(data['phone_no']) == CLIENT_STATUS.OFFLINE:
-        sock.emit(Events.CALL_REQUEST_STATUS, data={"msg": "request client not available"}, to=sid)
+        sock.emit(ServerEvents.CALL_REQUEST_STATUS, data={"msg": "request client not available"}, to=sid)
         
