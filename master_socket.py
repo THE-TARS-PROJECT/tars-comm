@@ -40,28 +40,29 @@ class ServerEvents(Enum):
     REQUEST_CALL = "REQUEST_CALL" # A is client is requesting the server to call another client
     CALL_ACCEPTED = "CALL_ACCEPTED" # The client has accepted the call, server will put both in a room
     CALL_REJECTED = "CALL_REJECTED" # The client rejected the call
+    CALL_REQUEST = "CALL_REQUEST" # Server tells the client b that a call is incoming
 
-"""
-connect
+class ClientEvents(Enum):
+    pass
 
-runs when a client connects 
-only registered clients allowed
-"""
+
 @sock.event
-async def connect(sid, environ, auth):
-    if client_manager.auth_client(auth['client_id'], auth['token']):
-        await sock.emit(ServerEvents.SERVER_MESSAGE, data={'msg': 'connected'}, to=sid)
+def connect(sid, environ, auth):
+    if client_manager.auth_client(sid, auth['phone_no'], auth['token']):
+        sock.emit(
+            ServerEvents.SERVER_MESSAGE, {"msg": "connected"}, to=sid
+        )
     else:
-        await sock.emit(ServerEvents.SERVER_MESSAGE, data={"msg": "failed to connect"}, to=sid)
+        sock.disconnect(sid)
 
+@sock.on(ServerEvents.REQUEST_CALL)
+def on_client_requests_call(sid, data):
+    client_status = client_manager.client_lookup(data['phone_no'])
+    if client_status == CLIENT_STATUS.BUSY or client_status == CLIENT_STATUS.ONLINE:
+        sock.emit(ServerEvents.CALL_REQUEST_STATUS, data={
+            "msg": client_status
+        }, to=sid)
 
-"""
-handle_dial
-
-client socket emits "request_dial"
-"""
-@sock.on("request_dial")
-def on_dial_requested(sid, data):
-    if client_manager.client_lookup(data['phone_no']) == CLIENT_STATUS.OFFLINE:
-        sock.emit(ServerEvents.CALL_REQUEST_STATUS, data={"msg": "request client not available"}, to=sid)
-        
+        sock.emit(ServerEvents.CALL_REQUEST, data={
+            "who": sid
+        }, to=client_manager.get_client_sid(data['phone_no']))

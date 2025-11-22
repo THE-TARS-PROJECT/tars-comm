@@ -20,7 +20,7 @@ class ContactsManager:
         self.contacts_list = None
         self.file = None
 
-        self.path = f"{getenv("HOME")}/tars/comm/contacts.json"
+        self.path = f"{getenv('HOME')}/tars/comm/contacts.json"
         
         if exists(self.path):
             with open(self.path, "r") as file:
