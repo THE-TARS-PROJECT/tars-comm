@@ -35,7 +35,7 @@ class ClientSock:
         try:
             access_token = self.auth.read_config()['access_token']
             await self.sock.connect(
-                "https://2da2e6c44a7c.ngrok-free.app",
+                "captainprice.hackclub.app",
                 auth={
                     "phone_no": phone_no,
                     "token": access_token
