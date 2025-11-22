@@ -5,6 +5,7 @@ from socketio import AsyncServer, ASGIApp
 from utils import ClientManager, CLIENT_STATUS
 
 from enum import Enum
+from uvicorn import run
 
 from auth_router import auth_router, s_client
 
@@ -66,3 +67,7 @@ def on_client_requests_call(sid, data):
         sock.emit(ServerEvents.CALL_REQUEST, data={
             "who": sid
         }, to=client_manager.get_client_sid(data['phone_no']))
+
+run(
+    app, host="0.0.0.0", port=21040
+)
