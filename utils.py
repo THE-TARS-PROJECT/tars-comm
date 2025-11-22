@@ -27,7 +27,7 @@ class ClientManager:
     def auth_client(self, phone_no: str, token: str):
         res = self.client.auth.get_user(token)
         if res.user.aud == "authenticated":
-            self.clients[phone_no] = {"room": "", "sid": sid}
+            self.clients[phone_no] = {"room": ""}
             return True
         else:
             return False

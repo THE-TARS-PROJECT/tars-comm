@@ -8,6 +8,7 @@ from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import RedirectResponse, JSONResponse
 
 from supabase import Client, create_client
+from supabase.client import AuthApiError
 
 load_dotenv("./config.env")
 
@@ -108,12 +109,21 @@ def login_client(email: str, password: str, client: Client = Depends(get_supabas
 
 
 @auth_router.post("/verify_jwt")
-def verify_jwt(jwt: str, client: Client = Depends(get_supabase_client)):
-    res = client.auth.get_claims(jwt)
-    return JSONResponse(content={
-        'name': res['claims']['user_metadata']['name'],
-        'ph_no': res['claims']['user_metadata']['ph_no']
-        })
+def verify_jwt(jwt: str, client: Client = Depends(get_supabase_client), refresh_token: str = ""):
+    try:
+        res = client.auth.get_claims(jwt)
+        return JSONResponse(content={
+            'name': res['claims']['user_metadata']['name'],
+            'ph_no': res['claims']['user_metadata']['ph_no']
+            })
+
+    except AuthApiError:
+        new_token = s_client.auth.refresh_session(refresh_token)
+        return JSONResponse(content={
+            'name': res['claims']['user_metadata']['name'],
+            'ph_no': res['claims']['user_metadata']['ph_no'],
+            "new_token": new_token
+            })
 
 @auth_router.get("/signout")
 def signout():

@@ -91,13 +91,15 @@ class App_(App):
         self.auth = Authenticator()
         self.audio_helper = AudioUtils()
         self.contacts_manager = ContactsManager()
-        self.dbus_interface = ClientDBUS()
+        self.dbus = ClientDBUS()
+
+        await self.dbus.setup()
 
         self.shared_instances = {
             "audio_helper": self.audio_helper,
             "contacts_manager": self.contacts_manager,
             "auth": self.auth,
-            "dbus": self.dbus_interface
+            "dbus_interface": self.dbus.get_interface()
         }
         self.screen.title = "TARS COMMUNICATION PROTOCOL"
 

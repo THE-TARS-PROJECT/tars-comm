@@ -168,6 +168,7 @@ Enter a number or select a contact to dial
 """
 class DialerScreen(Screen):
     def compose(self) -> ComposeResult:
+        self.dbus = self.app.shared_instances['dbus_interface']
         self.header = Header()
 
         self.dialer_input = Input(placeholder="Enter number / name of contact: ")
@@ -190,5 +191,7 @@ class DialerScreen(Screen):
         yield parent
 
     @on(Input.Submitted, "#dialer-input")
-    def on_submitted(self, event: Input.Submitted):
+    async def on_submitted(self, event: Input.Submitted):
+        if self.dialer_input.value != "":
+            await self.dbus.call_dial_number(self.dialer_input.value)
         self.dismiss(True)

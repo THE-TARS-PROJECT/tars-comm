@@ -17,14 +17,15 @@ class DBUSInterface(ServiceInterface):
         create_task(self.socket.connect(self.client_id))
 
     @dbus_method()
-    def dial_number(self, ph_no: 's') -> 's':
-        self.socket.dial_number(ph_no)
+    async def dial_number(self, ph_no: 's') -> 's':
+        await self.socket.dial_number(ph_no)
         print(f"calling..... {ph_no}")
         return f"calling..... {ph_no}"
     
 async def main():
     bus = await MessageBus().connect()
     inf = DBUSInterface("com.cooper.tars.interface")
+    # print(await inf.call_dial_number("Hello, World"))
     bus.export("/cooper/tars/comm", inf)
     await bus.request_name("com.cooper.tars")
     await Event().wait()

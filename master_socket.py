@@ -9,8 +9,16 @@ from uvicorn import run
 
 from auth_router import auth_router, s_client
 
+class ServerEvents(Enum):
+    SERVER_MESSAGE = "SERVER_MESSAGE" # Simple server message
+    CALL_REQUEST_STATUS = "CALL_REQUEST_STATUS" # Tells the client about the status of call request
+    REQUEST_CALL = "REQUEST_CALL" # A is client is requesting the server to call another client
+    CALL_ACCEPTED = "CALL_ACCEPTED" # The client has accepted the call, server will put both in a room
+    CALL_REJECTED = "CALL_REJECTED" # The client rejected the call
+    CALL_REQUEST = "CALL_REQUEST" # Server tells the client b that a call is incoming
 
 sock = AsyncServer(async_mode='asgi')
+
 f_app = FastAPI()
 app = ASGIApp(sock, f_app)
 
@@ -35,30 +43,21 @@ def dashboard(request: Request):
         }
     )
 
-class ServerEvents(Enum):
-    SERVER_MESSAGE = "SERVER_MESSAGE" # Simple server message
-    CALL_REQUEST_STATUS = "CALL_REQUEST_STATUS" # Tells the client about the status of call request
-    REQUEST_CALL = "REQUEST_CALL" # A is client is requesting the server to call another client
-    CALL_ACCEPTED = "CALL_ACCEPTED" # The client has accepted the call, server will put both in a room
-    CALL_REJECTED = "CALL_REJECTED" # The client rejected the call
-    CALL_REQUEST = "CALL_REQUEST" # Server tells the client b that a call is incoming
-
-class ClientEvents(Enum):
-    pass
-
 
 @sock.event
 async def connect(sid, environ, auth):
-    if client_manager.auth_client(sid, auth, str(sid)):
+    if client_manager.auth_client(auth['phone_no'], auth['token']):
         await sock.emit(
             ServerEvents.SERVER_MESSAGE.value, {"msg": "connected"}, to=sid
         )
     else:
         sock.disconnect(sid)
 
-@sock.on(ServerEvents.REQUEST_CALL.value)
+
 def on_client_requests_call(sid, data):
+    print(f'received request from {sid}')
     client_status = client_manager.client_lookup(data['phone_no'])
+    print(client_status)
     if client_status == CLIENT_STATUS.BUSY or client_status == CLIENT_STATUS.ONLINE:
         sock.emit(ServerEvents.CALL_REQUEST_STATUS.value, data={
             "msg": client_status.value
@@ -68,6 +67,4 @@ def on_client_requests_call(sid, data):
             "who": sid
         }, to=client_manager.get_client_sid(data['phone_no']))
 
-run(
-    app, host="0.0.0.0", port=21040
-)
+sock.on(ServerEvents.REQUEST_CALL.value, on_client_requests_call)

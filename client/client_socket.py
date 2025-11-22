@@ -35,7 +35,7 @@ class ClientSock:
         try:
             access_token = self.auth.read_config()['access_token']
             await self.sock.connect(
-                "https://captainprice.hackclub.app",
+                "https://2da2e6c44a7c.ngrok-free.app",
                 auth={
                     "phone_no": phone_no,
                     "token": access_token
@@ -70,8 +70,8 @@ class ClientSock:
     functions below are emitters 
     client -> server
     """
-    def dial_number(self, phone_no: str):
-        self.sock.emit(ServerEvents.REQUEST_CALL.value, data={
+    async def dial_number(self, phone_no: str):
+        await self.sock.emit(ServerEvents.REQUEST_CALL.value, data={
             "phone_no": phone_no
         })
         
