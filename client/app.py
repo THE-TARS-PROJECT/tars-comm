@@ -4,8 +4,8 @@ from textual.app import App, ComposeResult
 from textual.containers import VerticalGroup
 from textual.widgets import Header, Input, Button
 
-from client_utils import AudioUtils, ContactsManager
 from client_auth import Authenticator
+from client_utils import AudioUtils, ContactsManager, ClientDBUS
 
 from screens import DialerScreen, HomeScreen, AddContactDialog
 
@@ -91,11 +91,13 @@ class App_(App):
         self.auth = Authenticator()
         self.audio_helper = AudioUtils()
         self.contacts_manager = ContactsManager()
+        self.dbus_interface = ClientDBUS()
 
         self.shared_instances = {
             "audio_helper": self.audio_helper,
             "contacts_manager": self.contacts_manager,
-            "auth": self.auth
+            "auth": self.auth,
+            "dbus": self.dbus_interface
         }
         self.screen.title = "TARS COMMUNICATION PROTOCOL"
 

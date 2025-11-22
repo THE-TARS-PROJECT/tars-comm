@@ -31,13 +31,13 @@ class ClientSock:
         self.sock.on("server_msg", self.on_server_message)
         self.sock.on("call_resp", self.on_dial_req_response)
 
-    async def connect(self, client_id: str):
+    async def connect(self, phone_no: str):
         try:
             access_token = self.auth.read_config()['access_token']
             await self.sock.connect(
                 "https://captainprice.hackclub.app",
                 auth={
-                    "client_id": client_id,
+                    "phone_no": phone_no,
                     "token": access_token
                 }
             )
@@ -71,24 +71,7 @@ class ClientSock:
     client -> server
     """
     def dial_number(self, phone_no: str):
-        # self.sock.emit(ClientEvents.REQ_CALL, data={
-        #     "phone_no": phone_no
-        # })
         self.sock.emit(ServerEvents.REQUEST_CALL, data={
             "phone_no": phone_no
         })
         
-
-"""
-test
-"""
-# async def main():
-#     cs = ClientSock()
-#     await cs.connect("9582576830")
-
-
-# try:
-#     run(main())
-
-# except CancelledError:
-#     print("Closing the socket")

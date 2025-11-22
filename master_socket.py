@@ -47,9 +47,9 @@ class ClientEvents(Enum):
 
 
 @sock.event
-def connect(sid, environ, auth):
+async def connect(sid, environ, auth):
     if client_manager.auth_client(sid, auth['phone_no'], auth['token']):
-        sock.emit(
+        await sock.emit(
             ServerEvents.SERVER_MESSAGE, {"msg": "connected"}, to=sid
         )
     else:
