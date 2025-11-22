@@ -71,7 +71,7 @@ class ClientSock:
     client -> server
     """
     def dial_number(self, phone_no: str):
-        self.sock.emit(ServerEvents.REQUEST_CALL, data={
+        self.sock.emit(ServerEvents.REQUEST_CALL.value, data={
             "phone_no": phone_no
         })
         

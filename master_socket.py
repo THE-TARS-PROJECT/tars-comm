@@ -48,19 +48,19 @@ class ClientEvents(Enum):
 
 @sock.event
 async def connect(sid, environ, auth):
-    if client_manager.auth_client(sid, auth['phone_no'], auth['token']):
+    if client_manager.auth_client(sid, auth, str(sid)):
         await sock.emit(
-            ServerEvents.SERVER_MESSAGE, {"msg": "connected"}, to=sid
+            ServerEvents.SERVER_MESSAGE.value, {"msg": "connected"}, to=sid
         )
     else:
         sock.disconnect(sid)
 
-@sock.on(ServerEvents.REQUEST_CALL)
+@sock.on(ServerEvents.REQUEST_CALL.value)
 def on_client_requests_call(sid, data):
     client_status = client_manager.client_lookup(data['phone_no'])
     if client_status == CLIENT_STATUS.BUSY or client_status == CLIENT_STATUS.ONLINE:
-        sock.emit(ServerEvents.CALL_REQUEST_STATUS, data={
-            "msg": client_status
+        sock.emit(ServerEvents.CALL_REQUEST_STATUS.value, data={
+            "msg": client_status.value
         }, to=sid)
 
         sock.emit(ServerEvents.CALL_REQUEST, data={
