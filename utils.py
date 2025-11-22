@@ -24,10 +24,10 @@ class ClientManager:
     authenticate client, return true if registered else return false
     """
 
-    def auth_client(self, phone_no: str, token: str):
+    def auth_client(self, sid: str, phone_no: str, token: str):
         res = self.client.auth.get_user(token)
         if res.user.aud == "authenticated":
-            self.clients[phone_no] = {"room": ""}
+            self.clients[phone_no] = {"room": "", "sid": sid}
             return True
         else:
             return False

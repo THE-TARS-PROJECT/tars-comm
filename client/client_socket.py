@@ -28,8 +28,8 @@ class ClientSock:
         self.auth = Authenticator()
 
         # self.sock.on(Events.SERVER_MESSAGE, self.on_server_message)
-        self.sock.on("server_msg", self.on_server_message)
-        self.sock.on("call_resp", self.on_dial_req_response)
+        self.sock.on(ServerEvents.SERVER_MESSAGE, self.on_server_message)
+        self.sock.on(ServerEvents.CALL_REQUEST_STATUS, self.on_dial_req_response)
 
     async def connect(self, phone_no: str):
         try:

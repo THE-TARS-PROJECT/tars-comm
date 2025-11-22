@@ -43,10 +43,9 @@ def dashboard(request: Request):
         }
     )
 
-
 @sock.event
 async def connect(sid, environ, auth):
-    if client_manager.auth_client(auth['phone_no'], auth['token']):
+    if client_manager.auth_client(str(sid), auth['phone_no'], auth['token']):
         await sock.emit(
             ServerEvents.SERVER_MESSAGE.value, {"msg": "connected"}, to=sid
         )
@@ -64,7 +63,9 @@ def on_client_requests_call(sid, data):
         }, to=sid)
 
         sock.emit(ServerEvents.CALL_REQUEST, data={
-            "who": sid
+            "msg": {
+                "who": sid
+            }
         }, to=client_manager.get_client_sid(data['phone_no']))
 
 sock.on(ServerEvents.REQUEST_CALL.value, on_client_requests_call)
