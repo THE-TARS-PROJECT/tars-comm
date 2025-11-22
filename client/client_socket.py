@@ -8,11 +8,11 @@ from client_auth import Authenticator
 
 class ServerEvents(Enum):
     SERVER_MESSAGE = "SERVER_MESSAGE" # Simple server message
-    DIAL_REQ_RESP = "DIAL_REQ_RESP"
-
-
-class ClientEvents(Enum):
-    REQ_CALL = "REQUEST_CALL"
+    CALL_REQUEST_STATUS = "CALL_REQUEST_STATUS" # Tells the client about the status of call request
+    REQUEST_CALL = "REQUEST_CALL" # A is client is requesting the server to call another client
+    CALL_ACCEPTED = "CALL_ACCEPTED" # The client has accepted the call, server will put both in a room
+    CALL_REJECTED = "CALL_REJECTED" # The client rejected the call
+    CALL_REQUEST = "CALL_REQUEST" # Server tells the client b that a call is incoming
 
 
 def load_test_token():
@@ -74,7 +74,7 @@ class ClientSock:
         # self.sock.emit(ClientEvents.REQ_CALL, data={
         #     "phone_no": phone_no
         # })
-        self.sock.emit("request_dial", data={
+        self.sock.emit(ServerEvents.REQUEST_CALL, data={
             "phone_no": phone_no
         })
         
