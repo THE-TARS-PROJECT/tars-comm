@@ -54,7 +54,7 @@ async def connect(sid, environ, auth):
 
 
 def on_client_requests_call(sid, data):
-    print(f'received request from {sid}')
+    print(f'received request from {sid}', flush=True)
     client_status = client_manager.client_lookup(data['phone_no'])
     print(client_status)
     if client_status == CLIENT_STATUS.BUSY or client_status == CLIENT_STATUS.ONLINE:

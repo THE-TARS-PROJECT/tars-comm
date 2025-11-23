@@ -1,11 +1,71 @@
 from textual import on
 from textual.screen import Screen
 from textual.app import ComposeResult
-from textual.containers import Vertical, Horizontal
 from widgets import ContactList, RecentCallPanel
+from textual.containers import Vertical, Horizontal, VerticalGroup
 from textual.widgets import Header, Input, Label, ProgressBar, Button
 
 from widgets import AppFooter
+
+"""
+Login Screen
+
+shows when json field is empty
+"""
+class LoginScreen(Screen):
+    BINDINGS = [("escape", "app.pop_screen", "Pop screen")]
+
+    def on_mount(self):
+        self.auth = self.app.shared_instances['auth']
+
+
+    def compose(self) -> ComposeResult:
+        header = Header(show_clock=True)
+
+        self.email = Input(placeholder="Email", type="text", validate_on=['submitted'], classes='input-box')
+        self.password = Input(placeholder="Password", type="text", validate_on=['submitted'], classes='input-box')
+
+        submit_btn = Button("AUTHENTICATE", id="auth_btn")
+        submit_btn.flat = True
+        
+
+        fields_container = VerticalGroup(
+            self.email, 
+            self.password, 
+            submit_btn, 
+            classes="centered-container"
+        )
+
+        self.footer = AppFooter()
+
+        yield header
+        yield fields_container
+        yield self.footer
+
+    @on(Button.Pressed, "#auth_btn")
+    async def login_btn(self, event: Button.Pressed):
+        res = self.auth.login_user(
+            email=self.email.value,
+            password=self.password.value
+        )
+        if res != None:
+            self.auth.edit_config("name", res[0])
+            self.auth.edit_config("ph_no", res[1])
+            self.auth.edit_config("access_token", res[2])
+            self.auth.edit_config("refresh_token", res[3])
+            self.footer.update_status("[green]ACCESS GRANTED....[/green]")
+            self.app.push_screen("home")
+            self.app.title = "TARS COMMUNICATION PROTOCOL"
+
+        else:
+            self.footer.update_status("[red]ACCESS DENIED....[/red]")
+
+    CSS_PATH = "./style.tcss"
+
+
+    async def update_prog(self):
+        if self.prog_bar != None:
+            self.prog_bar.update(progress=int(self.audio_helper.volume))
 
 """
 HomeScreen
@@ -16,6 +76,9 @@ class HomeScreen(Screen):
     def __init__(self):
         super(HomeScreen, self).__init__()
 
+        self.dbus_interface = self.app.shared_instances['dbus_interface']
+        self.dbus_interface.on_on_call_response(self.handle_call_response)
+
         self.audio_helper = self.app.shared_instances['audio_helper']
     prog_bar = None
 
@@ -25,6 +88,9 @@ class HomeScreen(Screen):
 
     async def on_mount(self):
         self.set_interval(0.05, self.update_prog)
+
+    def handle_call_response(self, data):
+        self.app_footer.update_status("INCOMING CALL....")
 
     def action_show_dial_screen(self):
         self.app.push_screen("dialer")

@@ -23,8 +23,10 @@ def load_test_token():
 class ClientSock:
     def __init__(self):
         super(ClientSock, self).__init__()
+
+        self._on_dial_req_response = None
         
-        self.sock = AsyncClient(reconnection=False, logger=True)
+        self.sock = AsyncClient(reconnection=True, logger=True)
         self.auth = Authenticator()
 
         # self.sock.on(Events.SERVER_MESSAGE, self.on_server_message)
@@ -50,6 +52,8 @@ class ClientSock:
             self.sock.logger.error(f"An unexpected error occurred while connecting to the server: {str(con_error)}")
             print(f"An unexpected error occurred while connecting to the server: {str(con_error)}")
 
+            self.auth.login_with_token()
+
         except ConnectionRefusedError as con_refused:
             self.sock.logger.error(f"Server refused the connection: {str(con_refused)}")
             print(f"Server refused the connection: {str(con_refused)}")
@@ -63,7 +67,7 @@ class ClientSock:
         print(data['msg'])
 
     def on_dial_req_response(self, data):
-        print(data['msg'])
+        self._on_dial_req_response(data)
 
     
     """

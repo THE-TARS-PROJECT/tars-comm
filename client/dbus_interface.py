@@ -1,7 +1,6 @@
 from dbus_fast.aio import MessageBus
 from asyncio import run, create_task, Event
-from asyncio.exceptions import CancelledError
-from dbus_fast.service import ServiceInterface, dbus_method
+from dbus_fast.service import ServiceInterface, dbus_method, dbus_signal
 
 from client_socket import ClientSock
 from client_auth import Authenticator
@@ -14,13 +13,22 @@ class DBUSInterface(ServiceInterface):
         self.client_id = self.config['ph_no']
 
         self.socket = ClientSock()
+        self.socket._on_dial_req_response = self._on_call_response
         create_task(self.socket.connect(self.client_id))
 
     @dbus_method()
     async def dial_number(self, ph_no: 's') -> 's':
         await self.socket.dial_number(ph_no)
-        print(f"calling..... {ph_no}")
         return f"calling..... {ph_no}"
+    
+    async def _on_call_response(self, data):
+        await self.on_call_response(data)
+    
+    @dbus_signal()
+    def on_call_response(self, data: 'a{sv}') -> 'a{sv}': # type: ignore
+        print("received a call response")
+        print(data)
+        return data
     
 async def main():
     bus = await MessageBus().connect()

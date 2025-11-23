@@ -48,10 +48,21 @@ class Authenticator:
         })
         if req.status_code == 200 and req.json()['msg'] == "success":
             res = req.json()
-            return res["name"], res["ph_no"], res["access_token"]
+            return res["name"], res["ph_no"], res["access_token"], res['refresh_token']
             
         else:
             return None
+        
+    """
+    login_with_token
+    """
+    def login_with_token(self):
+        req = post(f"{self.endpoint}/auth/verify_jwt", params={
+            "jwt": self.config['access_token'],
+            "refresh_token": self.config['refresh_token']            
+        })
+        if req.ok:
+            self.edit_config("access_token", req.json()['new_token'])
         
     """
     logout_user

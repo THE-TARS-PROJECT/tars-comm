@@ -101,11 +101,13 @@ def login_client(email: str, password: str, client: Client = Depends(get_supabas
             "msg": "success",
             "name": res.user.user_metadata['name'],
             "ph_no": res.user.user_metadata['ph_no'],
-            "access_token": res.access_token
+            "access_token": res.access_token,
+            "refresh_token": res.refresh_token
         })
     
     except Exception as error:
         return JSONResponse(content={"msg": "failed to login", "error": str(error)})
+
 
 
 @auth_router.post("/verify_jwt")
