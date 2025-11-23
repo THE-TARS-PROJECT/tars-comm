@@ -52,6 +52,7 @@ class ClientSock:
             self.sock.logger.error(f"An unexpected error occurred while connecting to the server: {str(con_error)}")
             print(f"An unexpected error occurred while connecting to the server: {str(con_error)}")
 
+            print("verifying jwt....")
             self.auth.login_with_token()
 
         except ConnectionRefusedError as con_refused:

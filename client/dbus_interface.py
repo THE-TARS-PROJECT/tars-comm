@@ -30,7 +30,7 @@ class DBUSInterface(ServiceInterface):
         print(data)
         return data
     
-async def main():
+async def exec_interface():
     bus = await MessageBus().connect()
     inf = DBUSInterface("com.cooper.tars.interface")
     # print(await inf.call_dial_number("Hello, World"))
@@ -38,4 +38,5 @@ async def main():
     await bus.request_name("com.cooper.tars")
     await Event().wait()
 
-run(main())
+
+run(exec_interface())

@@ -1,15 +1,9 @@
-from textual import on
-from textual.screen import Screen
-from textual.app import App, ComposeResult
-from textual.containers import VerticalGroup
-from textual.widgets import Header, Input, Button
-
+from textual.app import App
+from asyncio import create_task
 from client_auth import Authenticator
+from dbus_interface import exec_interface
 from client_utils import AudioUtils, ContactsManager, ClientDBUS
-
 from screens import DialerScreen, HomeScreen, AddContactDialog, LoginScreen
-
-from widgets import AppFooter
 
 """
 main app
@@ -29,6 +23,7 @@ class App_(App):
         self.auth = Authenticator()
         self.audio_helper = AudioUtils()
         self.contacts_manager = ContactsManager()
+
         self.dbus = ClientDBUS()
 
         await self.dbus.setup()
