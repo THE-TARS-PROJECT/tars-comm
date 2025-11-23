@@ -29,6 +29,8 @@ class Authenticator:
                 data = {
                     "ph_no": "",
                     "name": "",
+                    "access_token": "",
+                    "refresh_token": ""
                 }
                 dump(data, config_file)
                 config_file.close()

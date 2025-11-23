@@ -1,7 +1,5 @@
 from textual.app import App
-from asyncio import create_task
 from client_auth import Authenticator
-from dbus_interface import exec_interface
 from client_utils import AudioUtils, ContactsManager, ClientDBUS
 from screens import DialerScreen, HomeScreen, AddContactDialog, LoginScreen
 
