@@ -1,41 +1,45 @@
-# implementation with dbus - systemd service
 from enum import Enum
-from asyncio import run, CancelledError
+from asyncio import create_task
 from socketio.async_client import AsyncClient
 from socketio.exceptions import ConnectionError, ConnectionRefusedError
 
 from client_auth import Authenticator
 
+
 class ServerEvents(Enum):
-    SERVER_MESSAGE = "SERVER_MESSAGE" # Simple server message
-    CALL_REQUEST_STATUS = "CALL_REQUEST_STATUS" # Tells the client about the status of call request
-    REQUEST_CALL = "REQUEST_CALL" # A is client is requesting the server to call another client
-    CALL_ACCEPTED = "CALL_ACCEPTED" # The client has accepted the call, server will put both in a room
-    CALL_REJECTED = "CALL_REJECTED" # The client rejected the call
-    CALL_REQUEST = "CALL_REQUEST" # Server tells the client b that a call is incoming
+    SERVER_MESSAGE = "SERVER_MESSAGE"
+    CALL_REQUEST_STATUS = "CALL_REQUEST_STATUS"
+    REQUEST_CALL = "REQUEST_CALL"
+    CALL_ACCEPTED = "CALL_ACCEPTED"
+    CALL_REJECTED = "CALL_REJECTED"
+    CALL_REQUEST = "CALL_REQUEST"
 
 
 def load_test_token():
     with open("./test-token.txt", "r") as token:
-        token_ = token.read()
-        return token_
+        return token.read()
+
 
 class ClientSock:
     def __init__(self):
-        super(ClientSock, self).__init__()
-
-        self._on_dial_req_response = None
-        
         self.sock = AsyncClient(reconnection=True, logger=True)
         self.auth = Authenticator()
 
-        # self.sock.on(Events.SERVER_MESSAGE, self.on_server_message)
-        self.sock.on(ServerEvents.SERVER_MESSAGE, self.on_server_message)
-        self.sock.on(ServerEvents.CALL_REQUEST_STATUS, self.on_dial_req_response)
+        
+        self._on_dial_req_response = None
+
+    def set_on_dial_request_response(self, callback):
+        self._on_dial_req_response = callback
 
     async def connect(self, phone_no: str):
         try:
             access_token = self.auth.read_config()['access_token']
+
+            self.sock.handlers.clear()
+
+            self.sock.on(ServerEvents.SERVER_MESSAGE.value, self.on_server_message)
+            self.sock.on(ServerEvents.CALL_REQUEST_STATUS.value, self.on_dial_req_status)
+
             await self.sock.connect(
                 "https://captainprice.hackclub.app",
                 auth={
@@ -43,40 +47,36 @@ class ClientSock:
                     "token": access_token
                 }
             )
-            self.sock.logger.info("Connected to server")
+
             print("Connected to server")
-            
-            await self.sock.wait()
+            create_task(self.sock.wait())
 
-        except ConnectionError as con_error:
-            self.sock.logger.error(f"An unexpected error occurred while connecting to the server: {str(con_error)}")
-            print(f"An unexpected error occurred while connecting to the server: {str(con_error)}")
-
-            print("verifying jwt....")
+        except ConnectionError as e:
+            print(f"Unexpected connection error: {str(e)}")
+            print("Revalidating JWT…")
             self.auth.login_with_token()
 
-        except ConnectionRefusedError as con_refused:
-            self.sock.logger.error(f"Server refused the connection: {str(con_refused)}")
-            print(f"Server refused the connection: {str(con_refused)}")
+        except ConnectionRefusedError as e:
+            print(f"Server rejected the connection: {str(e)}")
 
-    """
-    functions below are receivers
-    server -> client
-    """
+    async def disconnect(self):
+        """Call when your app closes to avoid queued events."""
+        try:
+            await self.sock.disconnect()
+            print("Disconnected from server cleanly.")
+        except Exception:
+            pass
 
     def on_server_message(self, data):
-        print(data['msg'])
+        print(f"SERVER_MESSAGE: {data.get('msg')}")
 
-    def on_dial_req_response(self, data):
-        self._on_dial_req_response(data)
+    def on_dial_req_status(self, data):
+        if self._on_dial_req_response:
+            self._on_dial_req_response(data)
+        else:
+            print("CALL_REQUEST_STATUS received but no handler set:", data)
 
-    
-    """
-    functions below are emitters 
-    client -> server
-    """
     async def dial_number(self, phone_no: str):
-        await self.sock.emit(ServerEvents.REQUEST_CALL.value, data={
+        await self.sock.emit(ServerEvents.REQUEST_CALL.value, {
             "phone_no": phone_no
         })
-        

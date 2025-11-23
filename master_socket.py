@@ -17,7 +17,7 @@ class ServerEvents(Enum):
     CALL_REJECTED = "CALL_REJECTED" # The client rejected the call
     CALL_REQUEST = "CALL_REQUEST" # Server tells the client b that a call is incoming
 
-sock = AsyncServer(async_mode='asgi')
+sock = AsyncServer(async_mode='asgi', ping_timeout=5, ping_interval=2)
 
 f_app = FastAPI()
 app = ASGIApp(sock, f_app)
@@ -54,7 +54,7 @@ async def connect(sid, environ, auth):
 
 
 def on_client_requests_call(sid, data):
-    print(f'received request from {sid}', flush=True)
+    print(f'received request from {sid}')
     client_status = client_manager.client_lookup(data['phone_no'])
     print(client_status)
     if client_status == CLIENT_STATUS.BUSY or client_status == CLIENT_STATUS.ONLINE:
