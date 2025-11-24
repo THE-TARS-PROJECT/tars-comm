@@ -54,7 +54,7 @@ async def connect(sid, environ, auth):
         sock.disconnect(sid)
 
 @sock.event
-async def disconnect(reason, sid):
+async def disconnect(sid, reason):
     print(f"Disconnected {sid}")
     client_manager.remove_client(sid)
     print(client_manager.clients)
