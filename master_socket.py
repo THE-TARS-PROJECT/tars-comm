@@ -17,7 +17,13 @@ class ServerEvents(Enum):
     CALL_REJECTED = "CALL_REJECTED" # The client rejected the call
     CALL_REQUEST = "CALL_REQUEST" # Server tells the client b that a call is incoming
 
-sock = AsyncServer(async_mode='asgi', ping_timeout=5, ping_interval=2)
+sock = AsyncServer(
+    async_mode='asgi',
+    cors_allowed_origins="*",
+    # relax default pings for hosted/proxied environments
+    ping_interval=25,
+    ping_timeout=60,
+)
 
 f_app = FastAPI()
 app = ASGIApp(sock, f_app)
@@ -62,7 +68,16 @@ async def disconnect(sid, reason):
 
 async def on_client_requests_call(sid, data):
     print(f'received request from {sid}')
-    client_status = client_manager.client_lookup(data['phone_no'])
+    # log full payload to help debug hosted/proxy differences
+    print("REQUEST_CALL payload:", data)
+
+    # defensive: ensure expected key exists
+    phone_no = data.get('phone_no') if isinstance(data, dict) else None
+    if not phone_no:
+        print("REQUEST_CALL missing 'phone_no' in payload; ignoring")
+        return
+
+    client_status = client_manager.client_lookup(phone_no)
     print(client_status)
     if client_status == CLIENT_STATUS.BUSY or client_status == CLIENT_STATUS.ONLINE:
         await sock.emit(ServerEvents.CALL_REQUEST_STATUS.value, data={

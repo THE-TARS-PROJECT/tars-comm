@@ -39,6 +39,8 @@ class ClientSock:
 
             self.sock.on(ServerEvents.SERVER_MESSAGE.value, self.on_server_message)
             self.sock.on(ServerEvents.CALL_REQUEST_STATUS.value, self.on_dial_req_status)
+            # ensure we handle incoming call notifications
+            self.sock.on(ServerEvents.CALL_REQUEST.value, self.on_call_request)
 
             await self.sock.connect(
                 # "https://c6955500d65d.ngrok-free.app",
@@ -46,7 +48,9 @@ class ClientSock:
                 auth={
                     "phone_no": phone_no,
                     "token": access_token
-                }
+                },
+                # prefer raw websocket transport when behind proxies
+                transports=["websocket"],
             )
 
             print("Connected to server")
@@ -77,6 +81,10 @@ class ClientSock:
             self._on_dial_req_response(data)
         else:
             print("CALL_REQUEST_STATUS received but no handler set:", data)
+
+    def on_call_request(self, data):
+        # handler for incoming call request from server
+        print("INCOMING CALL:", data)
 
     async def dial_number(self, phone_no: str):
         await self.sock.emit(ServerEvents.REQUEST_CALL.value, {
