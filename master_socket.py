@@ -46,26 +46,33 @@ def dashboard(request: Request):
 @sock.event
 async def connect(sid, environ, auth):
     if client_manager.auth_client(str(sid), auth['phone_no'], auth['token']):
+        print(client_manager.clients)
         await sock.emit(
             ServerEvents.SERVER_MESSAGE.value, {"msg": "connected"}, to=sid
         )
     else:
         sock.disconnect(sid)
 
+@sock.event
+async def disconnect(reason, sid):
+    print(f"Disconnected {sid}")
+    client_manager.remove_client(sid)
+    print(client_manager.clients)
 
-def on_client_requests_call(sid, data):
+
+async def on_client_requests_call(sid, data):
     print(f'received request from {sid}')
     client_status = client_manager.client_lookup(data['phone_no'])
     print(client_status)
     if client_status == CLIENT_STATUS.BUSY or client_status == CLIENT_STATUS.ONLINE:
-        sock.emit(ServerEvents.CALL_REQUEST_STATUS.value, data={
-            "msg": client_status.value
+        await sock.emit(ServerEvents.CALL_REQUEST_STATUS.value, data={
+            "msg": str(client_status.value)
         }, to=sid)
 
-        sock.emit(ServerEvents.CALL_REQUEST, data={
-            "msg": {
-                "who": sid
-            }
+        await sock.emit(ServerEvents.CALL_REQUEST.value, data={
+            "msg": "incoming call",
+            "who": sid
         }, to=client_manager.get_client_sid(data['phone_no']))
 
 sock.on(ServerEvents.REQUEST_CALL.value, on_client_requests_call)
+sock.on("disconnect", disconnect)

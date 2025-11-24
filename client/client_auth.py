@@ -5,7 +5,8 @@ from os import getenv, makedirs, path
 class Authenticator:
     def __init__(self):
         
-        self.endpoint = "https://captainprice.hackclub.app"
+        # self.endpoint = "https://captainprice.hackclub.app"
+        self.endpoint = "https://c6955500d65d.ngrok-free.app"
         self.home = getenv('HOME')
         self.config = self.read_config()
 

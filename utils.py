@@ -55,3 +55,8 @@ class ClientManager:
     def get_client_sid(self, phone_no: str):
         sid = self.clients[phone_no]["sid"]
         return sid
+    
+    def remove_client(self, sid: str):
+        for index, client in enumerate(self.clients.values()):
+            if client['sid'] == sid:
+                self.clients.pop(self.clients[list(self.clients.keys())[index]])

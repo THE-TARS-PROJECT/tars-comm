@@ -41,7 +41,7 @@ class ClientSock:
             self.sock.on(ServerEvents.CALL_REQUEST_STATUS.value, self.on_dial_req_status)
 
             await self.sock.connect(
-                "https://captainprice.hackclub.app",
+                "https://c6955500d65d.ngrok-free.app",
                 auth={
                     "phone_no": phone_no,
                     "token": access_token
@@ -71,6 +71,7 @@ class ClientSock:
         print(f"SERVER_MESSAGE: {data.get('msg')}")
 
     def on_dial_req_status(self, data):
+        print(data)
         if self._on_dial_req_response:
             self._on_dial_req_response(data)
         else:
