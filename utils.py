@@ -55,9 +55,11 @@ class ClientManager:
         except KeyError as not_found:
             return CLIENT_STATUS.OFFLINE
 
-    def get_client_sid(self, phone_no: str):
-        sid = self.clients[phone_no]["sid"]
-        return sid
+    # inefficient for large scale data, using only for dev purposes
+    def get_phone_by_sid(self, phone_no: str):
+        for index, client in enumerate(list(self.clients.keys())):
+            if self.clients[client['phone_no']] == phone_no:
+                return list(self.clients.keys())[index]
     
     def remove_client(self, sid: str):
         self.clients.pop(sid)

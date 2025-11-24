@@ -8,7 +8,7 @@ from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import RedirectResponse, JSONResponse
 
 from supabase import Client, create_client
-from supabase.client import AuthApiError
+from supabase_auth.errors import AuthInvalidJwtError
 
 load_dotenv("./config.env")
 
@@ -119,7 +119,7 @@ def verify_jwt(jwt: str, client: Client = Depends(get_supabase_client), refresh_
             'ph_no': res['claims']['user_metadata']['ph_no']
             })
 
-    except AuthApiError:
+    except AuthInvalidJwtError:
         new_token = s_client.auth.refresh_session(refresh_token)
         return JSONResponse(content={
             'name': res['claims']['user_metadata']['name'],
