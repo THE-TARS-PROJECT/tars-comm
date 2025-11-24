@@ -41,7 +41,8 @@ class ClientSock:
             self.sock.on(ServerEvents.CALL_REQUEST_STATUS.value, self.on_dial_req_status)
 
             await self.sock.connect(
-                "https://c6955500d65d.ngrok-free.app",
+                # "https://c6955500d65d.ngrok-free.app",
+                "https://captainprice.hackclub.app",
                 auth={
                     "phone_no": phone_no,
                     "token": access_token
