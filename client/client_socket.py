@@ -22,7 +22,8 @@ def load_test_token():
 
 class ClientSock:
     def __init__(self, on_incoming_call: callable):
-        super(ClientSock, self).__init__(self)
+        super(ClientSock, self).__init__()
+
         self.sock = AsyncClient(reconnection=True, logger=True)
         self.auth = Authenticator()
 
@@ -67,10 +68,9 @@ class ClientSock:
     def on_server_message(self, data):
         print(f"SERVER_MESSAGE: {data.get('msg')}")
 
-    def on_incoming_call(self, data):
-        print("incoming call.... sending to dbus")
+    async def on_incoming_call(self, data):
         if self._on_incoming_call:
-            self._on_incoming_call(data)
+            await self._on_incoming_call(data)
 
     async def dial_number(self, phone_no: str):
         await self.sock.emit(ServerEvents.REQUEST_CALL.value, {
