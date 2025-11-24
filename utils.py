@@ -27,7 +27,10 @@ class ClientManager:
     def auth_client(self, sid: str, phone_no: str, token: str):
         res = self.client.auth.get_user(token)
         if res.user.aud == "authenticated":
-            self.clients[phone_no] = {"room": "", "sid": sid}
+            self.clients[sid] = {
+                "phone_no": phone_no,
+                "room": ""
+            }
             return True
         else:
             return False
@@ -57,6 +60,4 @@ class ClientManager:
         return sid
     
     def remove_client(self, sid: str):
-        for index, client in enumerate(self.clients.values()):
-            if client['sid'] == sid:
-                self.clients.pop(self.clients[list(self.clients.keys())[index]])
+        self.clients.pop(sid)
