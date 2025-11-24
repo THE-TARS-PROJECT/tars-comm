@@ -86,7 +86,7 @@ async def on_client_requests_call(sid, data):
 
         await sock.emit(ServerEvents.CALL_REQUEST.value, data={
             "msg": "incoming call",
-            "who": sid
+            "who": phone_no
         }, to=client_manager.get_phone_by_sid(data['phone_no']))
 
 sock.on(ServerEvents.REQUEST_CALL.value, on_client_requests_call)

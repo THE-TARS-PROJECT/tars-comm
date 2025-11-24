@@ -42,24 +42,19 @@ class ClientManager:
     """
 
     def client_lookup(self, phone_no: str):
-        try:
-            if self.clients[phone_no]:
-                if self.clients[phone_no]["room"]:
-                    return CLIENT_STATUS.BUSY
-                else:
-                    return CLIENT_STATUS.ONLINE
-
-            else:
-                return CLIENT_STATUS.OFFLINE
-
-        except KeyError as not_found:
+        sid = self.get_phone_by_sid(phone_no)
+        if not self.clients[sid]:
             return CLIENT_STATUS.OFFLINE
+        elif self.clients[sid]['room'] == "":
+            return CLIENT_STATUS.ONLINE
+        else:
+            return CLIENT_STATUS.BUSY
 
     # inefficient for large scale data, using only for dev purposes
     def get_phone_by_sid(self, phone_no: str):
-        for index, client in enumerate(list(self.clients.keys())):
-            if self.clients[client['phone_no']] == phone_no:
-                return list(self.clients.keys())[index]
+        for sid in self.clients:
+            if self.clients[sid]['phone_no'] == phone_no:
+                return sid
     
     def remove_client(self, sid: str):
         self.clients.pop(sid)

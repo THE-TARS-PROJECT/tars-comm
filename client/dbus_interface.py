@@ -5,6 +5,8 @@ from dbus_fast.service import ServiceInterface, dbus_method, dbus_signal
 from client_socket import ClientSock
 from client_auth import Authenticator
 
+from plyer.facades import Notification
+
 class DBUSInterface(ServiceInterface):
     def __init__(self, name):
         super(DBUSInterface, self).__init__(name)
@@ -12,8 +14,11 @@ class DBUSInterface(ServiceInterface):
         self.config = Authenticator().read_config()
         self.client_id = self.config['ph_no']
 
+        self.notifyer = Notification()
+
         self.socket = ClientSock()
-        self.socket._on_dial_req_response = self._on_call_response
+        self.socket._on_incoming_call = self.on_incoming_call
+    
         create_task(self.socket.connect(self.client_id))
 
     @dbus_method()
@@ -21,14 +26,8 @@ class DBUSInterface(ServiceInterface):
         await self.socket.dial_number(ph_no)
         return f"calling..... {ph_no}"
     
-    async def _on_call_response(self, data):
-        await self.on_call_response(data)
-    
-    @dbus_signal()
-    def on_call_response(self, data: 'a{sv}') -> 'a{sv}': # type: ignore
-        print("received a call response")
-        print(data)
-        return data
+    async def on_incoming_call(self, data):
+        print("DBUS GOT THE INCOMING CALL")
     
 async def exec_interface():
     bus = await MessageBus().connect()

@@ -21,26 +21,19 @@ def load_test_token():
 
 
 class ClientSock:
-    def __init__(self):
+    def __init__(self, on_incoming_call: callable):
+        super(ClientSock, self).__init__(self)
         self.sock = AsyncClient(reconnection=True, logger=True)
         self.auth = Authenticator()
 
-        
-        self._on_dial_req_response = None
+        self._on_incoming_call = on_incoming_call
 
-    def set_on_dial_request_response(self, callback):
-        self._on_dial_req_response = callback
+        self.sock.on(ServerEvents.SERVER_MESSAGE.value, self.on_server_message)
+        self.sock.on(ServerEvents.CALL_REQUEST.value, self.on_incoming_call)
 
     async def connect(self, phone_no: str):
         try:
             access_token = self.auth.read_config()['access_token']
-
-            self.sock.handlers.clear()
-
-            self.sock.on(ServerEvents.SERVER_MESSAGE.value, self.on_server_message)
-            self.sock.on(ServerEvents.CALL_REQUEST_STATUS.value, self.on_dial_req_status)
-            # ensure we handle incoming call notifications
-            self.sock.on(ServerEvents.CALL_REQUEST.value, self.on_call_request)
 
             await self.sock.connect(
                 # "https://c6955500d65d.ngrok-free.app",
@@ -65,7 +58,6 @@ class ClientSock:
             print(f"Server rejected the connection: {str(e)}")
 
     async def disconnect(self):
-        """Call when your app closes to avoid queued events."""
         try:
             await self.sock.disconnect()
             print("Disconnected from server cleanly.")
@@ -75,16 +67,10 @@ class ClientSock:
     def on_server_message(self, data):
         print(f"SERVER_MESSAGE: {data.get('msg')}")
 
-    def on_dial_req_status(self, data):
-        print(data)
-        if self._on_dial_req_response:
-            self._on_dial_req_response(data)
-        else:
-            print("CALL_REQUEST_STATUS received but no handler set:", data)
-
-    def on_call_request(self, data):
-        # handler for incoming call request from server
-        print("INCOMING CALL:", data)
+    def on_incoming_call(self, data):
+        print("incoming call.... sending to dbus")
+        if self._on_incoming_call:
+            self._on_incoming_call(data)
 
     async def dial_number(self, phone_no: str):
         await self.sock.emit(ServerEvents.REQUEST_CALL.value, {
