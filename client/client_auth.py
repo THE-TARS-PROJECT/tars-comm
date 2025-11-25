@@ -52,7 +52,7 @@ class Authenticator:
             return res["name"], res["ph_no"], res["access_token"], res['refresh_token']
             
         else:
-            return None
+            print(req.json()['msg'])
         
     """
     login_with_token

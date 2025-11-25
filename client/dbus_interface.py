@@ -21,6 +21,10 @@ class DBUSInterface(ServiceInterface):
         await self.socket.dial_number(ph_no)
         return f"calling..... {ph_no}"
     
+    @dbus_signal()
+    async def incoming_call(self, who: 's') -> 's': # type: ignore
+        return who
+    
     async def on_incoming_call(self, data):
         Notification(
             "INCOMING CALL....",

@@ -1,4 +1,5 @@
 from textual import on
+from textual.reactive import reactive
 from textual.app import ComposeResult, App
 from textual.screen import Screen
 from textual.css.query import NoMatches
@@ -17,25 +18,14 @@ class AppFooter(Static):
     def __init__(self):
         super(AppFooter, self).__init__()
 
-        self.status = ""
+        self.status = reactive
 
     def compose(self) -> ComposeResult:
         stat_label = Label("STATUS: ")
-        stat_val = Label("IDLE", id="sys-stat")
+        self.stat_val = Label("IDLE", id="sys-stat")
 
-        h_container = HorizontalGroup(stat_label, stat_val)
+        h_container = HorizontalGroup(stat_label, self.stat_val)
         yield h_container
-
-    def on_mount(self, event):
-        self.update_status(self.status)
-
-    def update_status(self, status: str):
-        try:
-            stat_val = self.get_widget_by_id("sys-stat")
-            stat_val.update(status)
-
-        except NoMatches:
-            self.status = status
 
 
 class ContactItem(ListItem):

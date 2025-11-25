@@ -77,7 +77,8 @@ class HomeScreen(Screen):
         super(HomeScreen, self).__init__()
 
         self.dbus_interface = self.app.shared_instances['dbus_interface']
-        self.dbus_interface.on_on_call_response(self.handle_call_response)
+        self.auth = self.app.shared_instances['auth']
+        # self.dbus_interface.on_on_call_response(self.handle_call_response)
 
         self.audio_helper = self.app.shared_instances['audio_helper']
     prog_bar = None
@@ -88,23 +89,13 @@ class HomeScreen(Screen):
 
     async def on_mount(self):
         self.set_interval(0.05, self.update_prog)
+        self.dbus_interface.on_incoming_call(self.handle_incoming_call)
 
-    def handle_call_response(self, data):
-        self.app_footer.update_status("INCOMING CALL....")
+    def handle_incoming_call(self, data):
+        self.app_footer.status = "[yellow]INCOMING CALL....[/yellow]"
 
     def action_show_dial_screen(self):
         self.app.push_screen("dialer")
-
-    def handle_dialer_dismiss(self, data: dict):
-        if not data:
-            pass
-        else:
-            dialer_content = Vertical(
-                Label("----------------x----------------"),
-                Label(f"Name: {data['name']}"),
-                Label(f"Number: {data['number']}"),
-            )
-            self.main_content._add_child(dialer_content)
 
     async def update_prog(self):
         if self.prog_bar != None:
@@ -125,16 +116,33 @@ class HomeScreen(Screen):
         am_label = Label(f"Input Device: {active_microphone}")
         od_label = Label(f"Output Device: {active_od}")
 
+        self.who_name = Label(self.auth.config['name'])
+        self.who_number = Label(self.auth.config['ph_no'])
+
         left_bar = Vertical(contacts_list_widget, recent_calls_widget)
         left_bar.styles.width = "25%"
 
-        self.main_content = Vertical(am_label, od_label, self.prog_bar, classes="main-content")
+        dialer_content = Vertical(
+            Horizontal(
+                Label("Name: "), 
+                self.who_name
+            ),
+            Horizontal(
+                Label("Number: "),
+                self.who_number
+            )
+        )
+
+        dialer_content.styles.height = "10%"
+        dialer_content.styles.margin = (2, 0, 0, 0)
+
+        self.main_content = Vertical(am_label, od_label, self.prog_bar, dialer_content, classes="main-content")
         self.main_content.styles.margin = (2,2,2,2)
 
         main_layout = Horizontal(left_bar, self.main_content)
 
         self.app_footer = AppFooter()
-        self.app_footer.update_status("[green]CONNECTED....[/green]")
+        self.app_footer.status = "[green]CONNECTED....[/green]"
 
         yield Header(show_clock=True)
         yield main_layout
