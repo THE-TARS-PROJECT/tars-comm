@@ -5,14 +5,14 @@ from dbus_fast.service import ServiceInterface, dbus_method, dbus_signal
 from client_socket import ClientSock
 from client_auth import Authenticator
 
-from notify2 import Notification, init
+from plyer import notification
 
 class DBUSInterface(ServiceInterface):
     def __init__(self, name, socket: ClientSock = None):
         super(DBUSInterface, self).__init__(name)
 
         self.app_name = "TARS COMMUNICATION PROTOCOL"
-        init(self.app_name)
+
         # ensure setting socket manually
         self.socket = socket
 
@@ -24,13 +24,19 @@ class DBUSInterface(ServiceInterface):
     @dbus_signal()
     async def incoming_call(self, who: 's') -> 's': # type: ignore
         return who
+
+    def action_accept_call(self):
+        print("call accepted")
+
+    def action_decline_call(self):
+        print("call declined")
     
     async def on_incoming_call(self, data):
-        Notification(
-            "INCOMING CALL....",
+        notification.notify(
+            "INCOMING CALL...",
             f"{data['who']} is calling",
-            "notification-message-IM"
-        ).show()
+            self.app_name
+        )
     
 async def exec_interface():
     bus = await MessageBus().connect()

@@ -38,7 +38,7 @@ class ClientSock:
 
             await self.sock.connect(
                 # "https://c6955500d65d.ngrok-free.app",
-                "https://411c646d4018.ngrok-free.app",
+                "https://3a4624b02da4.ngrok-free.app",
                 auth={
                     "phone_no": phone_no,
                     "token": access_token
