@@ -1,14 +1,14 @@
-from time import sleep
-from os import getenv
-from os.path import exists
+from asyncio import run
 from json import dump, loads
-from threading import Lock
+from os.path import exists
+from os import getenv, path, makedirs
 
-from textual.app import App
-from textual.widgets import ListView, ProgressBar
+from textual.widgets import ListView
 
 import sounddevice as sd
 from numpy import linalg
+
+from dbus_fast.aio import MessageBus
 
 
 class ContactsManager:
@@ -20,15 +20,18 @@ class ContactsManager:
         self.contacts_list = None
         self.file = None
 
-        self.path = f"{getenv("HOME")}/tars/comm/contacts.json"
+        self.path = f"{getenv('HOME')}/tars/comm/contacts.json"
+        
         if exists(self.path):
-            self.file = open(self.path, "w")
-        else:
-            with open(self.path, "w") as contacts_file:
-                dump({}, contacts_file)
-                contacts_file.close()
+            with open(self.path, "r") as file:
+                self.contacts_data = loads(file.read())
+                file.close()
 
-            self.file = open(self.path, "w")
+        else:
+            makedirs(path.dirname(self.path), exist_ok=True)
+            with open(self.path, "w") as file:
+                dump(self.contacts_data, file)
+                file.close()
 
     def set_contacts_list_widget(self, widget):
         self._contacts_widget = widget
@@ -37,6 +40,8 @@ class ContactsManager:
         return self.contacts_data.keys()
 
     def add_contact(self, name: str, number: str):
+        if name in self.contacts_data.keys() or number in [num['number'] for num in self.contacts_data.values()]:
+            return "already exists"
         self.contacts_data[name] = {
             "name": name,
             "number": number,
@@ -45,15 +50,19 @@ class ContactsManager:
         contacts_list: ListView = self._contacts_widget.contacts_view
         contacts_list.append(self._contacts_widget.get_contact_item(name))
 
-        dump(self.contacts_data, self.file)
+        self.dump_data()
 
     def delete_contact(self, name: str):
         self.contacts_data.pop(name)
-        dump(self.contacts_data, self.file)
-
+        self.dump_data()
+    
     def edit_contact(self, name: str, new_name: str, new_number: str):
         self.delete_contact(name)
         self.add_contact(new_name, new_number)
+
+    def dump_data(self):
+        with open(self.path, "w") as file:
+            dump(self.contacts_data, file)
 
 class AudioUtils:
     def __init__(self):
@@ -65,7 +74,7 @@ class AudioUtils:
         self.volume = 0
 
         self.stream = sd.InputStream(samplerate=44100, blocksize=1024, callback=self.input_audio_callback)
-
+    
     def start_stream(self):
         self.stream.start()
 
@@ -87,3 +96,28 @@ class AudioUtils:
 
     def input_audio_callback(self, indata, frames, time, status):
         self.volume = linalg.norm(indata)*10
+
+
+class ClientDBUS:
+    def __init__(self):
+        super(ClientDBUS, self).__init__()
+
+        self.bus, self.obj, self.interface = None, None, None
+
+    async def setup(self):
+        self.bus = await MessageBus().connect()
+        intros = await self.bus.introspect(
+            "com.cooper.tars",
+            "/cooper/tars/comm"
+        )
+        self.obj = self.bus.get_proxy_object(
+            "com.cooper.tars",
+            "/cooper/tars/comm",
+            intros
+        )
+        self.interface = self.obj.get_interface("com.cooper.tars.interface")
+
+    def get_interface(self):
+        return self.interface
+    
+
