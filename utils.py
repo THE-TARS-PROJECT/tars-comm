@@ -60,6 +60,9 @@ class ClientManager:
         for index, client in enumerate(list(self.clients.keys())):
             if client['phone_no'] == phone_no:
                 return list(self.clients.keys())[index]
+
+    def update_room(self, sid: str, room_id: str):
+        self.clients[sid]['room'] = room_id
     
     def remove_client(self, sid: str):
         self.clients.pop(sid)

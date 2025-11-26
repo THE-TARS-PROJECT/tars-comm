@@ -1,3 +1,4 @@
+from uuid import uuid4
 from enum import Enum
 from asyncio import create_task
 from socketio.async_client import AsyncClient
@@ -78,5 +79,6 @@ class ClientSock:
 
     async def accept_call(self, sid, target_phone_no: str):
         await self.sock.emit(ServerEvents.CALL_ACCEPTED.value, data={
-                 "target": target_phone_no
+                 "target": target_phone_no,
+                 "room_id": str(uuid4())
              })

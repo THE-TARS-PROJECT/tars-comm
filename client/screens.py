@@ -78,6 +78,7 @@ class HomeScreen(Screen):
 
         self.dbus_iface = self.app.shared_instances['dbus_interface']
         self.auth = self.app.shared_instances['auth']
+        self.active_target = None
         # self.dbus_interface.on_on_call_response(self.handle_call_response)
 
         self.dbus_iface.on_incoming_call(self.show_call_options)
@@ -96,8 +97,20 @@ class HomeScreen(Screen):
     def show_call_options(self, who):
         self.accept_btn.disabled = False
         self.reject_btn.disabled = False
-        
+
+    @on(RadioButton.Changed, "#accept_call_btn")
+    def on_accept_pressed(self, event: RadioButton.Changed):
+        self.dbus_iface.call_accept_call(self.active_target)
+
+        self.accept_btn.disabled = True
+        self.reject_btn.disabled = True
+
+    @on(RadioButton.Changed, "#reject_call_btn")
+    def on_reject_pressed(self, event:RadioButton.Changed):
+        pass
+                    
     def handle_incoming_call(self, data):
+        self.active_target = data
         f = open("msg.txt", "w")
         f.write("textual client got the call")
         f.close()
@@ -143,8 +156,8 @@ class HomeScreen(Screen):
             )
         )
 
-        self.accept_btn = RadioButton("Accept")
-        self.reject_btn = RadioButton("Decline")
+        self.accept_btn = RadioButton("Accept", id="accept_call_btn", classes="accept_call_btn")
+        self.reject_btn = RadioButton("Decline", id="reject_call_btn", classes="reject_call_btn")
 
         self.accept_btn.disabled = True
         self.reject_btn.disabled = True
