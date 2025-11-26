@@ -89,5 +89,12 @@ async def on_client_requests_call(sid, data):
             "who": phone_no
         }, to=client_manager.get_phone_by_sid(data['phone_no']))
 
+
+# for my ref - sid, is sid of acceptor
+async def on_client_accepted_call(sid, data):
+    await sock.emit()
+
+
+sock.on(ServerEvents.CALL_ACCEPTED.value, on_client_accepted_call)
 sock.on(ServerEvents.REQUEST_CALL.value, on_client_requests_call)
 sock.on("disconnect", disconnect)

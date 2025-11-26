@@ -17,21 +17,40 @@ class DBUSInterface(ServiceInterface):
         self.socket = socket
 
     """
-        
-    """
+    dial_number 
 
+    tells the server to ping the target client
+    requires:
+    ph_no: str -> phone number of the target client 
+    """
     @dbus_method()
     async def dial_number(self, ph_no: 's') -> 's': #type: ignore
         await self.socket.dial_number(ph_no)
         return f"calling..... {ph_no}"
-    
+
+    """
+    incoming_call (signal)
+
+    emitted when some client calls
+    requires:
+    who -> phone_no of target client
+
+    by default wrapped under another function
+     """
     @dbus_signal("incoming_call")
     def incoming_call(self, who) -> 's': # type: ignore
         print("signal emitted")
         return who
 
-    def action_accept_call(self):
-        print("call accepted")
+
+    """
+    accept_call
+
+    accepts the call
+    """
+    @dbus_method()
+    def action_accept_call(self, who: 's') -> 's': #type:ignore
+        self.socket.accept_call()        
 
     def action_decline_call(self):
         print("call declined")

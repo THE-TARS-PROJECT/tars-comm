@@ -75,3 +75,8 @@ class ClientSock:
         await self.sock.emit(ServerEvents.REQUEST_CALL.value, {
             "phone_no": phone_no
         })
+
+    async def accept_call(self, sid, target_phone_no: str):
+        await self.sock.emit(ServerEvents.CALL_ACCEPTED.value, data={
+                 "target": target_phone_no
+             })
