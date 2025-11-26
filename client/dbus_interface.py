@@ -21,9 +21,10 @@ class DBUSInterface(ServiceInterface):
         await self.socket.dial_number(ph_no)
         return f"calling..... {ph_no}"
     
-    @dbus_signal()
-    def incoming_call(self, who: 's'): # type: ignore
+    @dbus_signal("incoming_call")
+    async def incoming_call(self, who) -> 's': # type: ignore
         print("signal emitted")
+        return who
 
     def action_accept_call(self):
         print("call accepted")
@@ -37,7 +38,7 @@ class DBUSInterface(ServiceInterface):
             f"{data['who']} is calling",
             self.app_name
         )
-        self.incoming_call(data['who'])
+        await self.incoming_call(data['who'])
     
 async def exec_interface():
     bus = await MessageBus().connect()

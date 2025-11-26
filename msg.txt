@@ -1,1 +1,1 @@
-got the signal boi
+[':1.344', ':1.344', ''], /org/freedesktop/DBus, org.freedesktop.DBus

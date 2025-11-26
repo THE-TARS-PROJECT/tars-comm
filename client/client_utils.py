@@ -124,8 +124,7 @@ class ClientDBUS:
 
     def handler(self, msg: Message):
         f = open("msg.txt", "w")
-        f.write("got the signal boi")
-        f.close()
+        f.write(f"{str(msg.body)}, {msg.path}, {msg.interface}")
         if msg.message_type != MessageType.SIGNAL:
             return False
         
@@ -138,7 +137,7 @@ class ClientDBUS:
         if msg.member in list(self.event_handlers.keys()):
             func = self.event_handlers[msg.member]
             if func:
-                func()
+                await func()
             return True
 
     def get_interface(self):
