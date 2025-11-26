@@ -3,7 +3,7 @@ from textual.screen import Screen
 from textual.app import ComposeResult
 from widgets import ContactList, RecentCallPanel
 from textual.containers import Vertical, Horizontal, VerticalGroup
-from textual.widgets import Header, Input, Label, ProgressBar, Button
+from textual.widgets import Header, Input, Label, ProgressBar, Button, RadioButton
 
 from widgets import AppFooter
 
@@ -76,7 +76,7 @@ class HomeScreen(Screen):
     def __init__(self):
         super(HomeScreen, self).__init__()
 
-        self.dbus_interface = self.app.shared_instances['dbus_interface']
+        self.dbus = self.app.shared_instances['dbus']
         self.auth = self.app.shared_instances['auth']
         # self.dbus_interface.on_on_call_response(self.handle_call_response)
 
@@ -89,10 +89,18 @@ class HomeScreen(Screen):
 
     async def on_mount(self):
         self.set_interval(0.05, self.update_prog)
-        self.dbus_interface.on_incoming_call(self.handle_incoming_call)
+        self.dbus.set_callback("incoming_call", self.show_call_options)
 
+    def show_call_options(self):
+        self.accept_btn.disabled = False
+        self.reject_btn.disabled = False
+        
     def handle_incoming_call(self, data):
+        f = open("msg.txt", "w")
+        f.write("textual client got the call")
+        f.close()
         self.app_footer.status = "[yellow]INCOMING CALL....[/yellow]"
+        self.show_call_options()
 
     def action_show_dial_screen(self):
         self.app.push_screen("dialer")
@@ -133,10 +141,21 @@ class HomeScreen(Screen):
             )
         )
 
+        self.accept_btn = RadioButton("Accept")
+        self.reject_btn = RadioButton("Decline")
+
+        self.accept_btn.disabled = True
+        self.reject_btn.disabled = True
+
+        call_options_box = Horizontal(
+            self.accept_btn, 
+            self.reject_btn
+        )
+
         dialer_content.styles.height = "10%"
         dialer_content.styles.margin = (2, 0, 0, 0)
 
-        self.main_content = Vertical(am_label, od_label, self.prog_bar, dialer_content, classes="main-content")
+        self.main_content = Vertical(am_label, od_label, self.prog_bar, dialer_content, call_options_box, classes="main-content")
         self.main_content.styles.margin = (2,2,2,2)
 
         main_layout = Horizontal(left_bar, self.main_content)

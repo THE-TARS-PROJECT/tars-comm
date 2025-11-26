@@ -30,7 +30,8 @@ class App_(App):
             "audio_helper": self.audio_helper,
             "contacts_manager": self.contacts_manager,
             "auth": self.auth,
-            "dbus_interface": self.dbus.get_interface()
+            "dbus_interface": self.dbus.get_interface(),
+            "dbus": self.dbus
         }
         self.screen.title = "TARS COMMUNICATION PROTOCOL"
 
