@@ -104,10 +104,6 @@ class ClientDBUS:
 
         self.bus, self.obj, self.interface = None, None, None
 
-        self.event_handlers = {
-            "incoming_call": None
-        }
-
     async def setup(self):
         self.bus = await MessageBus().connect()
         intros = await self.bus.introspect(
@@ -120,25 +116,6 @@ class ClientDBUS:
             intros
         )
         self.interface = self.obj.get_interface("com.cooper.tars.interface")
-        self.bus.add_message_handler(self.handler)
-
-    def handler(self, msg: Message):
-        f = open("msg.txt", "w")
-        f.write(f"{str(msg.body)}, {msg.path}, {msg.interface}")
-        if msg.message_type != MessageType.SIGNAL:
-            return False
-        
-        if msg.interface != "com.cooper.tars.interface":
-            return False
-
-        if msg.path != "/cooper/tars/comm":
-            return False
-            
-        if msg.member in list(self.event_handlers.keys()):
-            func = self.event_handlers[msg.member]
-            if func:
-                await func()
-            return True
 
     def get_interface(self):
         return self.interface

@@ -16,13 +16,17 @@ class DBUSInterface(ServiceInterface):
         # ensure setting socket manually
         self.socket = socket
 
+    """
+        
+    """
+
     @dbus_method()
     async def dial_number(self, ph_no: 's') -> 's': #type: ignore
         await self.socket.dial_number(ph_no)
         return f"calling..... {ph_no}"
     
     @dbus_signal("incoming_call")
-    async def incoming_call(self, who) -> 's': # type: ignore
+    def incoming_call(self, who) -> 's': # type: ignore
         print("signal emitted")
         return who
 
@@ -32,19 +36,19 @@ class DBUSInterface(ServiceInterface):
     def action_decline_call(self):
         print("call declined")
     
-    async def on_incoming_call(self, data):
+    async def _on_incoming_call(self, data):
         notification.notify(
             "INCOMING CALL...",
             f"{data['who']} is calling",
             self.app_name
         )
-        await self.incoming_call(data['who'])
+        self.incoming_call(data['who'])
     
 async def exec_interface():
     bus = await MessageBus().connect()
 
     inf = DBUSInterface("com.cooper.tars.interface")
-    sock = ClientSock(inf.on_incoming_call)
+    sock = ClientSock(inf._on_incoming_call)
     
     inf.socket = sock
     await inf.socket.connect(sock.auth.config['ph_no'])

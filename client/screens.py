@@ -76,9 +76,11 @@ class HomeScreen(Screen):
     def __init__(self):
         super(HomeScreen, self).__init__()
 
-        self.dbus = self.app.shared_instances['dbus']
+        self.dbus_iface = self.app.shared_instances['dbus_interface']
         self.auth = self.app.shared_instances['auth']
         # self.dbus_interface.on_on_call_response(self.handle_call_response)
+
+        self.dbus_iface.on_incoming_call(self.show_call_options)
 
         self.audio_helper = self.app.shared_instances['audio_helper']
     prog_bar = None
@@ -89,9 +91,9 @@ class HomeScreen(Screen):
 
     async def on_mount(self):
         self.set_interval(0.05, self.update_prog)
-        self.dbus.set_callback("incoming_call", self.show_call_options)
+#        self.dbus.set_callback("incoming_call", self.show_call_options)
 
-    def show_call_options(self):
+    def show_call_options(self, who):
         self.accept_btn.disabled = False
         self.reject_btn.disabled = False
         
