@@ -42,7 +42,7 @@ class ClientManager:
     """
 
     def client_lookup(self, phone_no: str):
-        sid = self.get_phone_by_sid(phone_no)
+        sid = self.get_sid_by_phone_no(phone_no)
         if not self.clients[sid]:
             return CLIENT_STATUS.OFFLINE
         elif self.clients[sid]['room'] == "":
@@ -50,16 +50,10 @@ class ClientManager:
         else:
             return CLIENT_STATUS.BUSY
 
-    # inefficient for large scale data, using only for dev purposes
-    def get_phone_by_sid(self, phone_no: str):
+    def get_sid_by_phone_no(self, phone_no: str):
         for sid in self.clients:
             if self.clients[sid]['phone_no'] == phone_no:
                 return sid
-
-    def get_sid_by_phone_no(self, phone_no: str):
-        for index, client in enumerate(list(self.clients.keys())):
-            if client['phone_no'] == phone_no:
-                return list(self.clients.keys())[index]
 
     def update_room(self, sid: str, room_id: str):
         self.clients[sid]['room'] = room_id

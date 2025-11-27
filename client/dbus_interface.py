@@ -49,14 +49,19 @@ class DBUSInterface(ServiceInterface):
     accepts the call
     """
     @dbus_method()
-    def accept_call(self, target: 's') -> 's': #type:ignore
+    async def accept_call(self): #type:ignore
         print("call accpeted")
-        self.socket.accept_call(
-            self.socket.get_sid(),
-            target
-        )    
+        await self.socket.accept_call(
+            self.socket.sock.get_sid(),
+            self.active_target
+        )
+
+    @dbus_method()
+    async def get_active_target(self) -> 's':
+        return self.active_target
 
     def action_decline_call(self):
+        self.active_target = None
         print("call declined")
     
     async def _on_incoming_call(self, data):
@@ -65,6 +70,7 @@ class DBUSInterface(ServiceInterface):
             f"{data['who']} is calling",
             self.app_name
         )
+        self.active_target = data['who']
         self.incoming_call(data['who'])
     
 async def exec_interface():

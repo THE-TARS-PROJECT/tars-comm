@@ -87,7 +87,7 @@ async def on_client_requests_call(sid, data):
         await sock.emit(ServerEvents.CALL_REQUEST.value, data={
             "msg": "incoming call",
             "who": phone_no
-        }, to=client_manager.get_phone_by_sid(data['phone_no']))
+        }, to=client_manager.get_sid_by_phone_no(data['phone_no']))
 
 
 # for my ref - sid, is sid of acceptor
@@ -96,12 +96,11 @@ async def on_client_accepted_call(sid, data):
     print("accepting call")
     target_sid = client_manager.get_sid_by_phone_no(data['target'])
     await sock.emit(ServerEvents.CALL_ACCEPTED.value, data={
-                "acceptor": data['phone_no'],
                 "room": data["room_id"]
             }, to=target_sid)
 
-    sock.enter_room(sid, data["room_id"])
-    sock.enter_room(target_sid, data['room_id'])
+    await sock.enter_room(sid, data["room_id"])
+    await sock.enter_room(target_sid, data['room_id'])
 
     client_manager.update_room(sid, data['room_id'])
     client_manager.update_room(target_sid, data['room_id'])

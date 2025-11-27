@@ -99,8 +99,8 @@ class HomeScreen(Screen):
         self.reject_btn.disabled = False
 
     @on(RadioButton.Changed, "#accept_call_btn")
-    def on_accept_pressed(self, event: RadioButton.Changed):
-        self.dbus_iface.call_accept_call(self.active_target)
+    async def on_accept_pressed(self, event: RadioButton.Changed):
+        await self.dbus_iface.call_accept_call()
 
         self.accept_btn.disabled = True
         self.reject_btn.disabled = True
@@ -110,10 +110,6 @@ class HomeScreen(Screen):
         pass
                     
     def handle_incoming_call(self, data):
-        self.active_target = data
-        f = open("msg.txt", "w")
-        f.write("textual client got the call")
-        f.close()
         self.app_footer.status = "[yellow]INCOMING CALL....[/yellow]"
         self.show_call_options()
 
