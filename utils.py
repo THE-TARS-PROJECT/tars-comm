@@ -42,13 +42,17 @@ class ClientManager:
     """
 
     def client_lookup(self, phone_no: str):
-        sid = self.get_sid_by_phone_no(phone_no)
-        if not self.clients[sid]:
+        try:
+            sid = self.get_sid_by_phone_no(phone_no)
+            if not self.clients[sid]:
+                return CLIENT_STATUS.OFFLINE
+            elif self.clients[sid]['room'] == "":
+                return CLIENT_STATUS.ONLINE
+            else:
+                return CLIENT_STATUS.BUSY
+
+        except KeyError:
             return CLIENT_STATUS.OFFLINE
-        elif self.clients[sid]['room'] == "":
-            return CLIENT_STATUS.ONLINE
-        else:
-            return CLIENT_STATUS.BUSY
 
     def get_sid_by_phone_no(self, phone_no: str):
         for sid in self.clients:

@@ -16,11 +16,11 @@ class ServerEvents(Enum):
     CALL_ACCEPTED = "CALL_ACCEPTED" # The client has accepted the call, server will put both in a room
     CALL_REJECTED = "CALL_REJECTED" # The client rejected the call
     CALL_REQUEST = "CALL_REQUEST" # Server tells the client b that a call is incoming
+    AUDIO_PACKET_EMIT = "AUDIO_PACKET_EMIT" # server is emitting audio packets
 
 sock = AsyncServer(
     async_mode='asgi',
     cors_allowed_origins="*",
-    # relax default pings for hosted/proxied environments
     ping_interval=25,
     ping_timeout=60,
 )
@@ -68,6 +68,7 @@ async def disconnect(sid, reason):
 
 async def on_client_requests_call(sid, data):
     phone_no = data.get('target_phone_no')
+    print(f"Target phone no: {phone_no}")
     client_status = client_manager.client_lookup(phone_no)
     print(client_status)
     if client_status == CLIENT_STATUS.BUSY or client_status == CLIENT_STATUS.ONLINE:
@@ -101,7 +102,14 @@ async def on_client_accepted_call(sid, data):
 
     print(client_manager.clients)
 
+async def on_audio_packet_received(sid, data):
+    print("getting audio pakcets")
+    await sock.emit(AUDIO_PACKET_EMIT.value, skip_sid=sid, data={
+            "audio_packet": "audio packet"
+        })
+
 
 sock.on(ServerEvents.CALL_ACCEPTED.value, on_client_accepted_call)
 sock.on(ServerEvents.REQUEST_CALL.value, on_client_requests_call)
+sock.on(ServerEvents.AUDIO_PACKET_EMIT.value, on_audio_packet_received)
 sock.on("disconnect", disconnect)

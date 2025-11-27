@@ -55,6 +55,16 @@ class DBUSInterface(ServiceInterface):
             self.active_target
         )
 
+    """
+    send_audio_packet
+
+    sends audio packet to room 
+    """
+    @dbus_method()
+    async def send_audio_packet(self, packet: 'ay'):
+        print("got some audio stuff")
+        await self.socket.send_audio_packet(packet)
+
     @dbus_method()
     async def get_active_target(self) -> 's':
         return self.active_target

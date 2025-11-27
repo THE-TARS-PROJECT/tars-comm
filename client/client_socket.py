@@ -14,7 +14,7 @@ class ServerEvents(Enum):
     CALL_ACCEPTED = "CALL_ACCEPTED"
     CALL_REJECTED = "CALL_REJECTED"
     CALL_REQUEST = "CALL_REQUEST"
-
+    AUDIO_PACKET_EMIT = "AUDIO_PACKET_EMIT"
 
 def load_test_token():
     with open("./test-token.txt", "r") as token:
@@ -75,7 +75,7 @@ class ClientSock:
     async def dial_number(self, phone_no: str):
         await self.sock.emit(ServerEvents.REQUEST_CALL.value, data={
                 "target_phone_no": phone_no,
-                "phone_no": self.config['ph_no']
+                "phone_no": self.auth.config['ph_no']
         })
 
     async def accept_call(self, sid, target_phone_no: str):
@@ -83,3 +83,8 @@ class ClientSock:
                  "target": target_phone_no,
                  "room_id": str(uuid4())
              })
+
+    async def send_audio_packet(self, sid, packet):
+        await self.sock.emit(ServerEvents.AUDIO_PACKET_EMIT.value, data={
+                     "packet": packet
+                 })

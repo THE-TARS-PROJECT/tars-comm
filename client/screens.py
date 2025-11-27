@@ -2,6 +2,7 @@ from textual import on
 from textual.screen import Screen
 from textual.app import ComposeResult
 from widgets import ContactList, RecentCallPanel
+from thread_audio import ThreadedAudioService
 from textual.containers import Vertical, Horizontal, VerticalGroup
 from textual.widgets import Header, Input, Label, ProgressBar, Button, RadioButton
 
@@ -84,6 +85,7 @@ class HomeScreen(Screen):
         self.dbus_iface.on_incoming_call(self.show_call_options)
 
         self.audio_helper = self.app.shared_instances['audio_helper']
+
     prog_bar = None
 
     BINDINGS = [
@@ -100,6 +102,8 @@ class HomeScreen(Screen):
 
     @on(RadioButton.Changed, "#accept_call_btn")
     async def on_accept_pressed(self, event: RadioButton.Changed):
+        threaded_service = ThreadedAudioService()
+        threaded_service.thread.start()
         await self.dbus_iface.call_accept_call()
 
         self.accept_btn.disabled = True

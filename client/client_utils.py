@@ -73,7 +73,7 @@ class AudioUtils:
 
         self.volume = 0
 
-        self.stream = sd.InputStream(samplerate=44100, blocksize=1024, callback=self.input_audio_callback)
+        self.stream = sd.InputStream(samplerate=44100, blocksize=1024, callback=self.input_audio_callback, dtype="float32")
     
     def start_stream(self):
         self.stream.start()
