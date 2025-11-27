@@ -77,8 +77,8 @@ async def on_client_requests_call(sid, data):
 
         await sock.emit(ServerEvents.CALL_REQUEST.value, data={
             "msg": "incoming call",
-            "who": client_manager.get_phone_by_sid(sid)
-        }, to=client_manager.get_sid_by_phone_no(data['phone_no']))
+            "who": data['phone_no']
+        }, to=client_manager.get_sid_by_phone_no(data['target_phone_no']))
 
 
 # for my ref - sid, is sid of acceptor
