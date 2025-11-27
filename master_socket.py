@@ -67,16 +67,7 @@ async def disconnect(sid, reason):
 
 
 async def on_client_requests_call(sid, data):
-    print(f'received request from {sid}')
-    # log full payload to help debug hosted/proxy differences
-    print("REQUEST_CALL payload:", data)
-
-    # defensive: ensure expected key exists
-    phone_no = data.get('phone_no') if isinstance(data, dict) else None
-    if not phone_no:
-        print("REQUEST_CALL missing 'phone_no' in payload; ignoring")
-        return
-
+    phone_no = data.get('target_phone_no')
     client_status = client_manager.client_lookup(phone_no)
     print(client_status)
     if client_status == CLIENT_STATUS.BUSY or client_status == CLIENT_STATUS.ONLINE:
@@ -86,7 +77,7 @@ async def on_client_requests_call(sid, data):
 
         await sock.emit(ServerEvents.CALL_REQUEST.value, data={
             "msg": "incoming call",
-            "who": phone_no
+            "who": client_manager.get_phone_by_sid(sid)
         }, to=client_manager.get_sid_by_phone_no(data['phone_no']))
 
 
@@ -101,6 +92,9 @@ async def on_client_accepted_call(sid, data):
 
     await sock.enter_room(sid, data["room_id"])
     await sock.enter_room(target_sid, data['room_id'])
+
+    print(f"{sid}: client sid")
+    print(f"{target_sid}: target sid")
 
     client_manager.update_room(sid, data['room_id'])
     client_manager.update_room(target_sid, data['room_id'])

@@ -73,9 +73,10 @@ class ClientSock:
             await self._on_incoming_call(data)
 
     async def dial_number(self, phone_no: str):
-        await self.sock.emit(ServerEvents.REQUEST_CALL.value, {
-            "phone_no": phone_no
+        await self.sock.emit(ServerEvents.REQUEST_CALL.value, data={
+                "target_phone_no": phone_no
         })
+        print(f"Client socket debug: calling {phone_no} ")
 
     async def accept_call(self, sid, target_phone_no: str):
         await self.sock.emit(ServerEvents.CALL_ACCEPTED.value, data={
