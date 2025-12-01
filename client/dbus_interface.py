@@ -61,12 +61,12 @@ class DBUSInterface(ServiceInterface):
     sends audio packet to room 
     """
     @dbus_method()
-    async def send_audio_packet(self, packet: 'ay'):
+    async def send_audio_packet(self, packet: 'ay'): #type: ignore
         print("got some audio stuff")
         await self.socket.send_audio_packet(packet)
 
     @dbus_method()
-    async def get_active_target(self) -> 's':
+    async def get_active_target(self) -> 's': #type:ignore
         return self.active_target
 
     def action_decline_call(self):
@@ -91,7 +91,6 @@ async def exec_interface():
     
     inf.socket = sock
     await inf.socket.connect(sock.auth.config['ph_no'])
-    # print(await inf.call_dial_number("Hello, World"))
     bus.export("/cooper/tars/comm", inf)
     await bus.request_name("com.cooper.tars")
     await Event().wait()

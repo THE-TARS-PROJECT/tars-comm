@@ -1,4 +1,5 @@
 from enum import Enum
+from uuid import uuid4
 from asyncio import create_task
 from socketio.async_client import AsyncClient
 from socketio.exceptions import ConnectionError, ConnectionRefusedError
@@ -25,6 +26,7 @@ class ClientSock:
         super(ClientSock, self).__init__()
 
         self.sock = AsyncClient(reconnection=True, logger=True)
+        self.active_room = ""
         self.auth = Authenticator()
 
         self._on_incoming_call = on_incoming_call
@@ -75,4 +77,10 @@ class ClientSock:
         await self.sock.emit(ServerEvents.REQUEST_CALL.value, {
             "target_phone_no": phone_no,
             "phone_no": self.auth.config['ph_no']
+        })
+
+    async def accept_call(self):
+        self.active_room = uuid4()
+        await self.sock.emit(ServerEvents.CALL_ACCEPTED.value, data={
+            "room_id": self.active_room
         })
