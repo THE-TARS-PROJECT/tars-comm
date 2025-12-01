@@ -73,5 +73,6 @@ class ClientSock:
 
     async def dial_number(self, phone_no: str):
         await self.sock.emit(ServerEvents.REQUEST_CALL.value, {
-            "phone_no": phone_no
+            "target_phone_no": phone_no,
+            "phone_no": self.auth.config['ph_no']
         })
