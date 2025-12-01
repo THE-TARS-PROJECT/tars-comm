@@ -1,4 +1,3 @@
-from uuid import uuid4
 from enum import Enum
 from asyncio import create_task
 from socketio.async_client import AsyncClient
@@ -14,7 +13,7 @@ class ServerEvents(Enum):
     CALL_ACCEPTED = "CALL_ACCEPTED"
     CALL_REJECTED = "CALL_REJECTED"
     CALL_REQUEST = "CALL_REQUEST"
-    AUDIO_PACKET_EMIT = "AUDIO_PACKET_EMIT"
+
 
 def load_test_token():
     with open("./test-token.txt", "r") as token:
@@ -33,12 +32,16 @@ class ClientSock:
         self.sock.on(ServerEvents.SERVER_MESSAGE.value, self.on_server_message)
         self.sock.on(ServerEvents.CALL_REQUEST.value, self.on_incoming_call)
 
+    def on_server_message(self, data):
+        print(f"SERVER_MESSAGE: {data.get('msg')}")
+
     async def connect(self, phone_no: str):
         try:
             access_token = self.auth.read_config()['access_token']
 
             await self.sock.connect(
-                "https://5f02b5135156.ngrok-free.app",
+                # "https://c6955500d65d.ngrok-free.app",
+                "https://411c646d4018.ngrok-free.app",
                 auth={
                     "phone_no": phone_no,
                     "token": access_token
@@ -65,26 +68,11 @@ class ClientSock:
         except Exception:
             pass
 
-    def on_server_message(self, data):
-        print(f"SERVER_MESSAGE: {data.get('msg')}")
-
     async def on_incoming_call(self, data):
         if self._on_incoming_call:
             await self._on_incoming_call(data)
 
     async def dial_number(self, phone_no: str):
-        await self.sock.emit(ServerEvents.REQUEST_CALL.value, data={
-                "target_phone_no": phone_no,
-                "phone_no": self.auth.config['ph_no']
+        await self.sock.emit(ServerEvents.REQUEST_CALL.value, {
+            "phone_no": phone_no
         })
-
-    async def accept_call(self, sid, target_phone_no: str):
-        await self.sock.emit(ServerEvents.CALL_ACCEPTED.value, data={
-                 "target": target_phone_no,
-                 "room_id": str(uuid4())
-             })
-
-    async def send_audio_packet(self, sid, packet):
-        await self.sock.emit(ServerEvents.AUDIO_PACKET_EMIT.value, data={
-                     "packet": packet
-                 })

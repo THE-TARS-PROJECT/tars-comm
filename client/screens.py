@@ -1,8 +1,8 @@
 from textual import on
 from textual.screen import Screen
+from asyncio import create_task
 from textual.app import ComposeResult
 from widgets import ContactList, RecentCallPanel
-from thread_audio import ThreadedAudioService
 from textual.containers import Vertical, Horizontal, VerticalGroup
 from textual.widgets import Header, Input, Label, ProgressBar, Button, RadioButton
 
@@ -79,12 +79,11 @@ class HomeScreen(Screen):
 
         self.dbus_iface = self.app.shared_instances['dbus_interface']
         self.auth = self.app.shared_instances['auth']
-        self.active_target = None
-        # self.dbus_interface.on_on_call_response(self.handle_call_response)
 
         self.dbus_iface.on_incoming_call(self.show_call_options)
 
         self.audio_helper = self.app.shared_instances['audio_helper']
+        self.audio_helper.dbus_interface = self.dbus_iface
 
     prog_bar = None
 
@@ -94,7 +93,6 @@ class HomeScreen(Screen):
 
     async def on_mount(self):
         self.set_interval(0.05, self.update_prog)
-#        self.dbus.set_callback("incoming_call", self.show_call_options)
 
     def show_call_options(self, who):
         self.accept_btn.disabled = False
@@ -102,9 +100,9 @@ class HomeScreen(Screen):
 
     @on(RadioButton.Changed, "#accept_call_btn")
     async def on_accept_pressed(self, event: RadioButton.Changed):
-        threaded_service = ThreadedAudioService()
-        threaded_service.thread.start()
         await self.dbus_iface.call_accept_call()
+
+        create_task(self.audio_helper.dbus_worker())
 
         self.accept_btn.disabled = True
         self.reject_btn.disabled = True

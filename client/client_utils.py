@@ -1,6 +1,7 @@
-from asyncio import run
+from asyncio import run, get_running_loop
 from json import dump, loads
 from os.path import exists
+from queue import SimpleQueue
 from os import getenv, path, makedirs
 
 from textual.widgets import ListView
@@ -68,12 +69,21 @@ class AudioUtils:
     def __init__(self):
         super(AudioUtils, self).__init__()
 
+        self.audio_buffer = SimpleQueue()
+
         self.input_device = None
         self.output_device = None
+        self.dbus_interface = None
 
         self.volume = 0
 
         self.stream = sd.InputStream(samplerate=44100, blocksize=1024, callback=self.input_audio_callback, dtype="float32")
+
+    async def dbus_worker(self):
+        while True:
+            loop = get_running_loop()
+            data_b = await loop.run_in_executor(None, self.audio_buffer.get)
+            await self.dbus_interface.call_send_audio_packet(data_b)
     
     def start_stream(self):
         self.stream.start()
@@ -96,6 +106,9 @@ class AudioUtils:
 
     def input_audio_callback(self, indata, frames, time, status):
         self.volume = linalg.norm(indata)*10
+        if self.dbus_interface is None:
+            self.volume = 0
+        self.audio_buffer.put_nowait(indata.tobytes())
 
 
 class ClientDBUS:
@@ -118,12 +131,5 @@ class ClientDBUS:
         self.interface = self.obj.get_interface("com.cooper.tars.interface")
 
     def get_interface(self):
-        return self.interface
-
-    def set_callback(self, signal: str, handler: callable):
-        if signal not in list(self.event_handlers.keys()):
-            raise Exception(f"Event - {signal} not in list.")
-        else:
-            self.event_handlers[signal] = handler
-    
+        return self.interface    
 
