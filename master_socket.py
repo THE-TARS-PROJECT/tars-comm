@@ -17,6 +17,7 @@ class ServerEvents(Enum):
     CALL_REJECTED = "CALL_REJECTED" # The client rejected the call
     CALL_REQUEST = "CALL_REQUEST" # Server tells the client b that a call is incoming
     AUDIO_PACKET_EMIT = "AUDIO_PACKET_EMIT" # server is emitting audio packets
+    AUDIO_PACKET_RECV = "AUDIO_PACKET_RECV"
 
 sock = AsyncServer(
     async_mode='asgi',
@@ -106,10 +107,10 @@ async def on_audio_packet_received(sid, data):
     print("getting audio pakcets")
     await sock.emit(ServerEvents.AUDIO_PACKET_EMIT.value, skip_sid=sid, data={
             "packet": data['packet']
-        })
+        }, room=data['room'])
 
 
 sock.on(ServerEvents.CALL_ACCEPTED.value, on_client_accepted_call)
 sock.on(ServerEvents.REQUEST_CALL.value, on_client_requests_call)
-sock.on(ServerEvents.AUDIO_PACKET_EMIT.value, on_audio_packet_received)
+sock.on(ServerEvents.AUDIO_PACKET_RECV.value, on_audio_packet_received)
 sock.on("disconnect", disconnect)

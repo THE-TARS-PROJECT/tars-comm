@@ -91,8 +91,9 @@ class ClientSock:
         })
 
     async def broadcast_audio_packet(self, packet: bytes):
-        self.sock.emit(ServerEvents.AUDIO_PACKET_EMIT, data={
-            "packet": packet
+        self.sock.emit(ServerEvents.AUDIO_PACKET_EMIT.value, data={
+            "packet": packet, 
+            "room": self.active_room
         })
 
     async def on_audio_packet_recv(self, data):
