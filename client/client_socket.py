@@ -91,7 +91,7 @@ class ClientSock:
         })
 
     async def broadcast_audio_packet(self, packet: bytes):
-        self.sock.emit(ServerEvents.AUDIO_PACKET_EMIT.value, data={
+        await self.sock.emit(ServerEvents.AUDIO_PACKET_EMIT.value, data={
             "packet": packet, 
             "room": self.active_room
         })
