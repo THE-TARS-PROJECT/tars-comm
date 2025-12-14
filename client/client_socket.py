@@ -36,6 +36,7 @@ class ClientSock:
 
         self.sock.on(ServerEvents.SERVER_MESSAGE.value, self.on_server_message)
         self.sock.on(ServerEvents.CALL_REQUEST.value, self.on_incoming_call)
+        self.sock.on(ServerEvents.AUDIO_PACKET_RECV, self.on_audio_packet_recv)
 
     def on_server_message(self, data):
         print(f"SERVER_MESSAGE: {data.get('msg')}")
@@ -50,7 +51,7 @@ class ClientSock:
                     "phone_no": phone_no,
                     "token": access_token
                 },
-                # prefer raw websocket transport when behind proxies
+                
                 transports=["websocket"],
             )
 
