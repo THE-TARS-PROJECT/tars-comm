@@ -86,14 +86,14 @@ class DBUSInterface(ServiceInterface):
         self._on_incoming_audio_packet(data)
 
     @dbus_signal("incoming_audio")
-    async def _on_incoming_audio_packet(self, packet: 'y') -> 'y': # type:ignore
+    async def incoming_audio(self, packet: 'y') -> 'y': # type:ignore
         return packet
     
 async def exec_interface():
     bus = await MessageBus().connect()
 
     inf = DBUSInterface("com.cooper.tars.interface")
-    sock = ClientSock(inf._on_incoming_call, inf._on_incoming_audio_packet)
+    sock = ClientSock(inf._on_incoming_call, inf.on_incoming_audio_packet)
     
     inf.socket = sock
     await inf.socket.connect(sock.auth.config['ph_no'])

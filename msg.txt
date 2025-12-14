@@ -1,1 +1,0 @@
-[':1.314', ':1.314', ''], /org/freedesktop/DBus, org.freedesktop.DBus
