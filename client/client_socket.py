@@ -14,6 +14,7 @@ class ServerEvents(Enum):
     CALL_ACCEPTED = "CALL_ACCEPTED"
     CALL_REJECTED = "CALL_REJECTED"
     CALL_REQUEST = "CALL_REQUEST"
+    AUDIO_PACKET_EMIT = "AUDIO_PACKET_EMIT" # server is emitting audio packets
 
 
 def load_test_token():
@@ -42,7 +43,7 @@ class ClientSock:
             access_token = self.auth.read_config()['access_token']
 
             await self.sock.connect(
-                "https://ea2271926b53.ngrok-free.app",
+                "https://5fc73fee4efc.ngrok-free.app",
                 auth={
                     "phone_no": phone_no,
                     "token": access_token
@@ -79,8 +80,14 @@ class ClientSock:
             "phone_no": self.auth.config['ph_no']
         })
 
-    async def accept_call(self):
+    async def accept_call(self, target: str):
         self.active_room = uuid4()
         await self.sock.emit(ServerEvents.CALL_ACCEPTED.value, data={
-            "room_id": self.active_room
+            "room_id": str(self.active_room),
+            "target": target
+        })
+
+    async def broadcast_audio_packet(self, packet: bytes):
+        self.sock.emit(ServerEvents.AUDIO_PACKET_EMIT, data={
+            "packet": packet
         })
