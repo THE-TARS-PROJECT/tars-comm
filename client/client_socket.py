@@ -15,6 +15,7 @@ class ServerEvents(Enum):
     CALL_REJECTED = "CALL_REJECTED"
     CALL_REQUEST = "CALL_REQUEST"
     AUDIO_PACKET_EMIT = "AUDIO_PACKET_EMIT" # server is emitting audio packets
+    AUDIO_PACKET_RECV = "AUDIO_PACKET_RECV" # client is recving some audio packets
 
 
 def load_test_token():
@@ -23,7 +24,7 @@ def load_test_token():
 
 
 class ClientSock:
-    def __init__(self, on_incoming_call: callable):
+    def __init__(self, on_incoming_call: callable, on_audio_packet_recv: callable):
         super(ClientSock, self).__init__()
 
         self.sock = AsyncClient(reconnection=True, logger=True)
@@ -31,6 +32,7 @@ class ClientSock:
         self.auth = Authenticator()
 
         self._on_incoming_call = on_incoming_call
+        self._on_audio_packet_recv = on_audio_packet_recv
 
         self.sock.on(ServerEvents.SERVER_MESSAGE.value, self.on_server_message)
         self.sock.on(ServerEvents.CALL_REQUEST.value, self.on_incoming_call)
@@ -91,3 +93,7 @@ class ClientSock:
         self.sock.emit(ServerEvents.AUDIO_PACKET_EMIT, data={
             "packet": packet
         })
+
+    async def on_audio_packet_recv(self, data):
+        if self._on_audio_packet_recv:
+            self._on_audio_packet_recv(data['packet'])

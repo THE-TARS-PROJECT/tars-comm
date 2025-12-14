@@ -51,7 +51,6 @@ class DBUSInterface(ServiceInterface):
     async def accept_call(self): #type:ignore
         print(f"target phone no: {self.active_target}")
         await self.socket.accept_call(
-            self.socket.sock.get_sid(),
             self.active_target
         )
 
@@ -63,7 +62,7 @@ class DBUSInterface(ServiceInterface):
     @dbus_method()
     async def send_audio_packet(self, packet: 'ay'): #type: ignore
         print("got some audio stuff")
-        await self.socket.send_audio_packet(packet)
+        await self.socket.broadcast_audio_packet(packet)
 
     @dbus_method()
     async def get_active_target(self) -> 's': #type:ignore
@@ -82,12 +81,19 @@ class DBUSInterface(ServiceInterface):
         self.active_target = data['who']
         print(f"{data['who']} is calling - incoming call debug")
         self.incoming_call(data['who'])
+
+    def on_incoming_audio_packet(self, data):
+        self._on_incoming_audio_packet(data)
+
+    @dbus_signal("incoming_audio")
+    async def _on_incoming_audio_packet(self, packet: 'y') -> 'y': # type:ignore
+        return packet
     
 async def exec_interface():
     bus = await MessageBus().connect()
 
     inf = DBUSInterface("com.cooper.tars.interface")
-    sock = ClientSock(inf._on_incoming_call)
+    sock = ClientSock(inf._on_incoming_call, inf._on_incoming_audio_packet)
     
     inf.socket = sock
     await inf.socket.connect(sock.auth.config['ph_no'])

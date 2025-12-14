@@ -1,4 +1,4 @@
-from asyncio import run, get_running_loop
+from asyncio import get_running_loop
 from json import dump, loads
 from os.path import exists
 from queue import SimpleQueue
@@ -9,7 +9,6 @@ from textual.widgets import ListView
 import sounddevice as sd
 from numpy import linalg
 
-from dbus_fast import Message, MessageType
 from dbus_fast.aio import MessageBus
 
 class ContactsManager:
@@ -70,6 +69,7 @@ class AudioUtils:
         super(AudioUtils, self).__init__()
 
         self.audio_buffer = SimpleQueue()
+        self.out_audio_buffer = SimpleQueue()
 
         self.input_device = None
         self.output_device = None
@@ -77,16 +77,32 @@ class AudioUtils:
 
         self.volume = 0
 
-        self.stream = sd.InputStream(samplerate=44100, blocksize=1024, callback=self.input_audio_callback, dtype="float32")
+        self.in_stream = sd.InputStream(samplerate=44100, blocksize=1024, callback=self.input_audio_callback, dtype="float32")
+        self.out_stream = sd.OutputStream(samplerate=44100, blocksize=1024, callback=self.on_audio_packet_recvd)
 
     async def dbus_worker(self):
         while True:
             loop = get_running_loop()
             data_b = await loop.run_in_executor(None, self.audio_buffer.get)
             await self.dbus_interface.call_send_audio_packet(data_b)
+
+    async def audio_recv_dbus_worker(self):
+        while True:
+            loop = get_running_loop()
+            data_b = await loop.run_in_executor(None, self.out_audio_buffer.get)
+            self.out_stream.write(data_b)
     
     def start_stream(self):
-        self.stream.start()
+        self.in_stream.start()
+
+    def start_out_stream(self):
+        if self.dbus_interface:
+            self.out_stream.start()
+            self.dbus_interface.incoming_audio(self.on_audio_packet_recvd)
+
+    def on_audio_packet_recvd(self, packet: bytes):
+        self.out_audio_buffer.put_nowait(packet)
+
 
     """
     get default audio input and output devices

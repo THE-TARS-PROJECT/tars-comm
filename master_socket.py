@@ -105,7 +105,7 @@ async def on_client_accepted_call(sid, data):
 async def on_audio_packet_received(sid, data):
     print("getting audio pakcets")
     await sock.emit(ServerEvents.AUDIO_PACKET_EMIT.value, skip_sid=sid, data={
-            "audio_packet": "audio packet"
+            "packet": data['packet']
         })
 
 
