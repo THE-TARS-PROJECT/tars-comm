@@ -1,7 +1,7 @@
-from asyncio import get_running_loop
-from json import dump, loads
 from os.path import exists
+from json import dump, loads
 from queue import SimpleQueue
+from asyncio import get_running_loop
 from os import getenv, path, makedirs
 
 from textual.widgets import ListView
