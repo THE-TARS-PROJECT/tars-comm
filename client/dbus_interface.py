@@ -1,9 +1,8 @@
+from asyncio import run, Event
 from dbus_fast.aio import MessageBus
-from asyncio import run, create_task, Event
 from dbus_fast.service import ServiceInterface, dbus_method, dbus_signal
 
 from client_socket import ClientSock
-from client_auth import Authenticator
 
 from plyer import notification
 
@@ -60,8 +59,8 @@ class DBUSInterface(ServiceInterface):
     sends audio packet to room 
     """
     @dbus_method()
-    async def send_audio_packet(self, packet: 'y'): #type: ignore
-        print("sending packet")
+    async def send_audio_packet(self, packet: 'ay'): #type: ignore
+        print(f"Got packet: {str(packet)}")
         await self.socket.broadcast_audio_packet(packet)
 
     @dbus_method()

@@ -84,7 +84,6 @@ class HomeScreen(Screen):
 
         self.audio_helper = self.app.shared_instances['audio_helper']
         self.audio_helper.dbus_interface = self.dbus_iface
-        self.audio_helper.start_stream()
 
     prog_bar = None
 
