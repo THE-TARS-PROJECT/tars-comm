@@ -84,7 +84,7 @@ class ClientSock:
         })
 
     async def accept_call(self, target: str):
-        self.active_room = uuid4()
+        self.active_room = str(uuid4())
         await self.sock.emit(ServerEvents.CALL_ACCEPTED.value, data={
             "room_id": str(self.active_room),
             "target": target
