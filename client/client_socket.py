@@ -46,7 +46,7 @@ class ClientSock:
             access_token = self.auth.read_config()['access_token']
 
             await self.sock.connect(
-                "https://bcaa701a0cde.ngrok-free.app",
+                "https://99872d770943.ngrok-free.app",
                 auth={
                     "phone_no": phone_no,
                     "token": access_token
