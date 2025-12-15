@@ -60,7 +60,7 @@ class DBUSInterface(ServiceInterface):
     sends audio packet to room 
     """
     @dbus_method()
-    async def send_audio_packet(self, packet: 'ay'): #type: ignore
+    async def send_audio_packet(self, packet: 'y'): #type: ignore
         print("sending packet")
         await self.socket.broadcast_audio_packet(packet)
 
