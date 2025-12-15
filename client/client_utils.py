@@ -2,7 +2,7 @@ from traceback import print_exc
 from os.path import exists
 from json import dump, loads
 from queue import SimpleQueue
-from asyncio import get_running_loop
+from asyncio import get_running_loop, sleep
 from os import getenv, path, makedirs
 
 from textual.widgets import ListView
@@ -82,12 +82,12 @@ class AudioUtils:
         self.out_stream = sd.OutputStream(samplerate=44100, blocksize=1024, callback=self.on_audio_packet_recvd)
 
     async def dbus_worker(self):
-        f = open("dump.txt", "w")
         while True:
             loop = get_running_loop()
             try:
                 data_b = await loop.run_in_executor(None, self.audio_buffer.get)
                 await self.dbus_interface.call_send_audio_packet(data_b)
+                sleep(0.5)
 
             except Exception as e:
                 print(str(e))

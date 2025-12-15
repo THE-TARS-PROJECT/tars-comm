@@ -103,6 +103,8 @@ class HomeScreen(Screen):
         await self.dbus_iface.call_accept_call()
 
         create_task(self.audio_helper.dbus_worker())
+        self.audio_helper.start_out_stream()
+        create_task(self.audio_helper.audio_recv_dbus_worker())
 
         self.accept_btn.disabled = True
         self.reject_btn.disabled = True
