@@ -39,6 +39,17 @@ class DBUSInterface(ServiceInterface):
     @dbus_signal("incoming_call")
     def incoming_call(self, who) -> 's': # type: ignore
         return who
+    
+
+    async def _on_incoming_call(self, data):
+        notification.notify(
+            "INCOMING CALL...",
+            f"{data['who']} is calling",
+            self.app_name
+        )
+        self.active_target = data['who']
+        print(f"{data['who']} is calling - incoming call debug")
+        self.incoming_call(data['who'])
 
 
     """
@@ -70,19 +81,9 @@ class DBUSInterface(ServiceInterface):
     def action_decline_call(self):
         self.active_target = None
         print("call declined")
-    
-    async def _on_incoming_call(self, data):
-        notification.notify(
-            "INCOMING CALL...",
-            f"{data['who']} is calling",
-            self.app_name
-        )
-        self.active_target = data['who']
-        print(f"{data['who']} is calling - incoming call debug")
-        self.incoming_call(data['who'])
 
     def on_incoming_audio_packet(self, data):
-        self._on_incoming_audio_packet(data)
+        self.incoming_audio(data)
 
     @dbus_signal("incoming_audio")
     async def incoming_audio(self, packet: 'y') -> 'y': # type:ignore
