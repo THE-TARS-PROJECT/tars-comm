@@ -105,7 +105,7 @@ class AudioUtils:
     def start_out_stream(self):
         if self.dbus_interface:
             self.out_stream.start()
-            self.dbus_interface.incoming_audio(self.on_audio_packet_recvd)
+            self.dbus_interface.on_incoming_audio(self.on_audio_packet_recvd)
 
     def on_audio_packet_recvd(self, packet: bytes):
         self.out_audio_buffer.put_nowait(packet)
