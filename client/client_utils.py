@@ -79,7 +79,7 @@ class AudioUtils:
         self.volume = 0
 
         self.in_stream = sd.InputStream(samplerate=44100, blocksize=1024, callback=self.input_audio_callback, dtype="float32")
-        # self.out_stream = sd.OutputStream(samplerate=44100, blocksize=1024, callback=self.on_audio_packet_recvd)
+        self.out_stream = sd.OutputStream(samplerate=44100, blocksize=1024, callback=self.on_audio_packet_recvd)
 
     async def dbus_worker(self):
         f = open("dump.txt", "w")
@@ -93,22 +93,22 @@ class AudioUtils:
                 print(str(e))
                 print_exc()
 
-    # async def audio_recv_dbus_worker(self):
-    #     while True:
-    #         loop = get_running_loop()
-    #         data_b = await loop.run_in_executor(None, self.out_audio_buffer.get)
-    #         self.out_stream.write(data_b)
+    async def audio_recv_dbus_worker(self):
+        while True:
+            loop = get_running_loop()
+            data_b = await loop.run_in_executor(None, self.out_audio_buffer.get)
+            self.out_stream.write(data_b)
     
     def start_stream(self):
         self.in_stream.start()
 
-    # def start_out_stream(self):
-    #     if self.dbus_interface:
-    #         self.out_stream.start()
-    #         self.dbus_interface.incoming_audio(self.on_audio_packet_recvd)
+    def start_out_stream(self):
+        if self.dbus_interface:
+            self.out_stream.start()
+            self.dbus_interface.incoming_audio(self.on_audio_packet_recvd)
 
-    # def on_audio_packet_recvd(self, packet: bytes):
-    #     self.out_audio_buffer.put_nowait(packet)
+    def on_audio_packet_recvd(self, packet: bytes):
+        self.out_audio_buffer.put_nowait(packet)
 
 
     """

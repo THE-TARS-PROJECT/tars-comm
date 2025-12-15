@@ -97,5 +97,6 @@ class ClientSock:
         })
 
     async def on_audio_packet_recv(self, data):
+        print("socket got an audio packet sending to dbus")
         if self._on_audio_packet_recv:
             self._on_audio_packet_recv(data['packet'])
