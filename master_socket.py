@@ -105,12 +105,12 @@ async def on_client_accepted_call(sid, data):
 
 async def on_audio_packet_received(sid, data):
     print("getting audio pakcets")
-    await sock.emit(ServerEvents.AUDIO_PACKET_EMIT.value, skip_sid=sid, data={
+    await sock.emit(ServerEvents.AUDIO_PACKET_RECV.value, skip_sid=sid, data={
             "packet": data['packet']
         }, room=data['room'])
 
 
 sock.on(ServerEvents.CALL_ACCEPTED.value, on_client_accepted_call)
 sock.on(ServerEvents.REQUEST_CALL.value, on_client_requests_call)
-sock.on(ServerEvents.AUDIO_PACKET_RECV.value, on_audio_packet_received)
+sock.on(ServerEvents.AUDIO_PACKET_EMIT.value, on_audio_packet_received)
 sock.on("disconnect", disconnect)

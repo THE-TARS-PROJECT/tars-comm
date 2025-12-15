@@ -61,6 +61,7 @@ class DBUSInterface(ServiceInterface):
     """
     @dbus_method()
     async def send_audio_packet(self, packet: 'ay'): #type: ignore
+        print("sending packet")
         await self.socket.broadcast_audio_packet(packet)
 
     @dbus_method()
@@ -86,6 +87,7 @@ class DBUSInterface(ServiceInterface):
 
     @dbus_signal("incoming_audio")
     async def incoming_audio(self, packet: 'y') -> 'y': # type:ignore
+        print("got a packet")
         return packet
     
 async def exec_interface():
