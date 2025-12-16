@@ -1,9 +1,11 @@
 from traceback import print_exc
 from os.path import exists
 from json import dump, loads
-from queue import SimpleQueue
+from queue import SimpleQueue, Empty
 from asyncio import get_running_loop, sleep
 from os import getenv, path, makedirs
+
+from numpy import frombuffer
 
 from textual.widgets import ListView
 
@@ -69,49 +71,54 @@ class AudioUtils:
     def __init__(self):
         super(AudioUtils, self).__init__()
 
-        self.audio_buffer = SimpleQueue()
-        self.out_audio_buffer = SimpleQueue()
+        self.input_buff = SimpleQueue()
+        self.output_buff = SimpleQueue()
 
         self.input_device = None
         self.output_device = None
         self.dbus_interface = None
+
+        self.isInCall = False
 
         self.volume = 0
 
         SAMPLERATE = 44100
         BLOCKSIZE = 1024
         CHANNEL = 1
-        DTYPE = 'float32'
+        self.DTYPE = 'float32'
 
-        self.in_stream = sd.InputStream(
-            samplerate=SAMPLERATE, 
-            blocksize=BLOCKSIZE, 
-            callback=self.input_audio_callback,
+        self.audio_io_stream = sd.Stream(
+            samplerate=SAMPLERATE,
+            blocksize=BLOCKSIZE,
+            dtype=self.DTYPE,
             channels=CHANNEL,
-            dtype=DTYPE
+            callback=self.audio_io_callback
         )
 
-        self.out_stream = sd.OutputStream(
-            samplerate=SAMPLERATE, 
-            blocksize=BLOCKSIZE, 
-            channels=CHANNEL,
-            callback=self.on_audio_packet_recvd
-        )
+        self.dbus_interface.on_incoming_audio(self.on_audio_packet_recvd)
 
     def start_stream(self):
-        self.in_stream.start()
+        self.audio_io_stream.start()
 
-
-    def start_out_stream(self):
-        if self.dbus_interface:
-            self.out_stream.start()
-            self.dbus_interface.on_incoming_audio(self.on_audio_packet_recvd)
-
-    def input_audio_callback(self, indata, frames, time, status):
+    def audio_io_callback(self, indata, outdata, frames, time, status):
         self.volume = linalg.norm(indata)*10
         if self.dbus_interface is None:
             self.volume = 0
-        self.audio_buffer.put_nowait(indata.tobytes())
+        self.input_buff.put_nowait(indata.tobytes())
+        self.play_incoming_audio(outdata)
+
+    def play_incoming_audio(self, outdata):
+        try:
+            pkt = self.input_buff.get_nowait()
+            audio_data = frombuffer(pkt, self.DTYPE)
+            audio_data = audio_data.reshape(outdata.shape)
+            outdata[:] = audio_data 
+
+        except Empty:
+            outdata.fill(0)
+
+        except ValueError:
+            outdata.fill(0)
 
     async def dbus_worker(self):
         while True:
@@ -124,12 +131,6 @@ class AudioUtils:
             except Exception as e:
                 print(str(e))
                 print_exc()
-
-    async def audio_recv_dbus_worker(self):
-        while True:
-            loop = get_running_loop()
-            data_b = await loop.run_in_executor(None, self.out_audio_buffer.get)
-            self.out_stream.write(data_b)
 
     def on_audio_packet_recvd(self, packet: bytes):
         self.out_audio_buffer.put_nowait(packet)
