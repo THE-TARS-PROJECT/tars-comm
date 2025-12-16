@@ -76,5 +76,12 @@ You might encounter the following issues:
    python3 client/dbus_interface.py
    ```
 
+ - NGROK account error
+ You will need to setup your ngrok account. Check this [page](https://ngrok.com/docs/getting-started#2-connect-your-account).
+
+ - Address already in use
+
+   For initial ease of use, the server runs on port 8000, other services might be running on the same port. Terminate other process and run the server again.
+
 ## Author
 Raghav Kumar (@Raghav67816)
