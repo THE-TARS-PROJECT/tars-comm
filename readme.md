@@ -1,12 +1,14 @@
 # TARS COMMUNICATION PROTOCOL
 
+**This project is under development, and is it is not at all recommended to put any sensitive info.**
+
 Terminal is cool, like super cool. What if you make calls from your terminal giving you a sci-fi feel. Isn't that crazy. Yess, it is.
 
 TARS COMMUNICATION PROTOCAL is **terminal based VoIP app**. It works like just another VoIP client but in your terminal.
 
 ![ss](https://raw.githubusercontent.com/THE-TARS-PROJECT/tars-comm/refs/heads/main/screenshots/Screenshot%20from%202025-11-14%2012-17-17.png)
 
-![ss](https://raw.githubusercontent.com/THE-TARS-PROJECT/tars-comm/refs/heads/main/screenshots/Screenshot%20from%202025-11-14%2012-17-22.png)
+![ss(https://raw.githubusercontent.com/THE-TARS-PROJECT/tars-comm/refs/heads/main/screenshots/Screenshot%20from%202025-11-14%2012-17-22.png)
 
 ## Features
  - Terminal based sci-fi aesthetics
@@ -20,58 +22,59 @@ TARS COMMUNICATION PROTOCAL is **terminal based VoIP app**. It works like just a
 ## Installation
 To install tars-comm project.
 
-- Download the latest executable 'TARS_COM_PROTOCOL-Patched'
-
-```bash
-chmod +x ./TARS_COM_PROTOCOL-Patched
-./TARS_COM_PROTOCOL-Patched
-```
-
-I will post a setup.sh script soon. This script will install tars-comm as linux service and it will simplify installation process.
-
-## Build From Source
-If you are using MacOS follow the steps below:
- - Make sure you have Python3 installed on your computer.
- - Install the SOURCE CODE from here https://github.com/THE-TARS-PROJECT/tars-comm/archive/refs/tags/dev.zip
- - Open terminal in the project root
- - Install requirements
-
-   ```bash
-   pip3 install numpy textual python-socketio sounddevice supabase fastapi python-dotenv
-   cd client/
-   ```
- - Run the app
+ - Download the installation script.
  ```bash
-   python3 app.py
+ wget https://raw.githubusercontent.com/THE-TARS-PROJECT/tars-comm/refs/heads/main/setup%20app.sh
  ```
 
-## HOW TO:
- - make an account ?
+ - Give permission and run
+ ```bash
+ chmod +x ./setup\ app.sh
+ bash ./setup\ app.sh
+ ```
 
-    Go to https://tars-comm.onrender.com/auth/signup , make an account, login to verify and you will redirected to a dashboard after that just put your email and password in the terminal app.
+ Now you are in the project root directory. Run the app and please pay close attention to print messages.
 
-    **NOTE: APIs hosted on Render go inactive after inactivity**
+ - Run the server
+ ```bash
+ chmod +x ./run\ server.sh
+ bash ./run\ server.sh
+ ```
 
- - add contact ?
+ **NOTE: You will see a like url https://xyz123.ngrok.free.app copy this url and paste it in *client/config.env (URL Variable)***
 
-    Use tab to navigate between widget. Once, the Contact List widget is highlighted press **"a"** to add contact and put the details. This can be anything for now
+ Now open another terminal in the project root folder.
+ ```bash
+ chmod +x ./run\ app.sh
+ bash ./run\ app.sh
+ ```
 
- - delete contact ?
-    
-    Simply press **"d"** on the highlight contact item.
+ **Don't forget to make an account: Go to http://127.0.0.1:8000/auth/signup and make your account.**
 
- - call my friend ?
-
-    haha!! wait for sometime, my nest request is not approved yet. But still press **"c"** and enter the number and press **enter**.
+## Keymap
+ - `a`:  Add a new contact
+ - `d`: Delete contact
+ - `c`: Open dialer
+ - `up/down arrow key and TAB` : Navigate
+ - `Ctrl + Q`: Exit
 
 ## Troubleshooting
-If you are facing any issues please refer to this section:
+You might encounter the following issues:
 
-- Failed to connect to server
-  head over to https://captainprice.hackclub.app/login and log in to your account. You will be redirected to dashboard, right click on the page and go to Inspect -> Application -> Cookies
-  Copy the token value and paste it in **test-token.txt**
+ - errors related to 'new token' or "Revalidating JWT":
 
-  This will be fixed ;)
+   To fix run 
+   ```bash
+   python3 client/force_manual_login.py
+   ```
+
+ - .service file not provided:
+   
+   This means that DBUS service was not found. To start it manually, go to project root and activate the Python virtual environment and run.
+
+   ```bash
+   python3 client/dbus_interface.py
+   ```
 
 ## Author
 Raghav Kumar (@Raghav67816)
