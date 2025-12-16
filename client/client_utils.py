@@ -78,8 +78,40 @@ class AudioUtils:
 
         self.volume = 0
 
-        self.in_stream = sd.InputStream(samplerate=44100, blocksize=1024, callback=self.input_audio_callback, dtype="float32")
-        self.out_stream = sd.OutputStream(samplerate=44100, blocksize=1024, callback=self.on_audio_packet_recvd)
+        SAMPLERATE = 44100
+        BLOCKSIZE = 1024
+        CHANNEL = 1
+        DTYPE = 'float32'
+
+        self.in_stream = sd.InputStream(
+            samplerate=SAMPLERATE, 
+            blocksize=BLOCKSIZE, 
+            callback=self.input_audio_callback,
+            channels=CHANNEL,
+            dtype=DTYPE
+        )
+
+        self.out_stream = sd.OutputStream(
+            samplerate=SAMPLERATE, 
+            blocksize=BLOCKSIZE, 
+            channels=CHANNEL,
+            callback=self.on_audio_packet_recvd
+        )
+
+    def start_stream(self):
+        self.in_stream.start()
+
+
+    def start_out_stream(self):
+        if self.dbus_interface:
+            self.out_stream.start()
+            self.dbus_interface.on_incoming_audio(self.on_audio_packet_recvd)
+
+    def input_audio_callback(self, indata, frames, time, status):
+        self.volume = linalg.norm(indata)*10
+        if self.dbus_interface is None:
+            self.volume = 0
+        self.audio_buffer.put_nowait(indata.tobytes())
 
     async def dbus_worker(self):
         while True:
@@ -98,14 +130,6 @@ class AudioUtils:
             loop = get_running_loop()
             data_b = await loop.run_in_executor(None, self.out_audio_buffer.get)
             self.out_stream.write(data_b)
-    
-    def start_stream(self):
-        self.in_stream.start()
-
-    def start_out_stream(self):
-        if self.dbus_interface:
-            self.out_stream.start()
-            self.dbus_interface.on_incoming_audio(self.on_audio_packet_recvd)
 
     def on_audio_packet_recvd(self, packet: bytes):
         self.out_audio_buffer.put_nowait(packet)
@@ -126,12 +150,6 @@ class AudioUtils:
         self.output_device = do_info['name']
 
         return (self.input_device, self.output_device)
-
-    def input_audio_callback(self, indata, frames, time, status):
-        self.volume = linalg.norm(indata)*10
-        if self.dbus_interface is None:
-            self.volume = 0
-        self.audio_buffer.put_nowait(indata.tobytes())
 
 
 class ClientDBUS:
