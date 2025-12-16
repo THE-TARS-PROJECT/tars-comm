@@ -1,4 +1,5 @@
 from textual.app import App
+from dotenv import load_dotenv
 from client_auth import Authenticator
 from client_utils import AudioUtils, ContactsManager, ClientDBUS
 from screens import DialerScreen, HomeScreen, AddContactDialog, LoginScreen
@@ -18,6 +19,8 @@ class App_(App):
     CSS_PATH = "style.tcss"
 
     async def on_mount(self):
+        load_dotenv("./config.env")
+
         self.auth = Authenticator()
         self.audio_helper = AudioUtils()
         self.contacts_manager = ContactsManager()

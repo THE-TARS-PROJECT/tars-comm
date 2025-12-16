@@ -1,3 +1,4 @@
+from os import getenv
 from enum import Enum
 from uuid import uuid4
 from asyncio import create_task
@@ -44,9 +45,10 @@ class ClientSock:
     async def connect(self, phone_no: str):
         try:
             access_token = self.auth.read_config()['access_token']
+            url = getenv('URL')
 
             await self.sock.connect(
-                "https://99872d770943.ngrok-free.app",
+                url,
                 auth={
                     "phone_no": phone_no,
                     "token": access_token
